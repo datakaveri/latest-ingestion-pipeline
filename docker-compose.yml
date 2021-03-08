@@ -22,8 +22,8 @@ services:
     image: iudx/redis-client:latest
     volumes:
       - type: bind
-        source: ./redis-client.py 
-        target: /usr/share/app/redis-client.py
+        source: ./redis-client-async.py 
+        target: /usr/share/app/redis-client-async.py
       - type: bind
         source: ./attribute_list.json  
         target: /usr/share/app/attribute_list.json

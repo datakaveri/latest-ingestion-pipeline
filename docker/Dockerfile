@@ -1,7 +1,7 @@
-FROM python:3-alpine
+FROM python:3.8-slim-buster
 
 WORKDIR /usr/share/app
 COPY requirements.txt .
-RUN apk update && python -m pip install --upgrade pip && pip install -r requirements.txt 
-ENTRYPOINT ["python", "redis-client.py"]
+RUN apt update && python -m pip install --upgrade pip && pip install -r requirements.txt 
+ENTRYPOINT ["python", "redis-client-async.py"]
 

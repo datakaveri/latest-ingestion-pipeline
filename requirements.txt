@@ -1,8 +1,9 @@
-websocket-client==0.53.0
-websockets==8.1
 jsonpatch==1.22
 jsonpointer==2.0
 jsonschema==3.2.0
 rejson==0.5.4
 simplejson==3.16.0
-
+aio_pika==6.8.0
+aiormq==3.3.1
+pamqp==2.3.0
+yarl==1.6.3
