@@ -1,0 +1,39 @@
+version: '3.4'
+
+networks:
+  overlay-net:
+    external: true
+    driver: overlay
+
+services:
+  redis-server:
+    image: redislabs/rejson:latest
+    volumes:
+      - type: volume
+        source: redis-data
+        target: /data
+      - ./configs/redis.conf:/data/redis.conf
+    restart: on-failure
+    networks:
+      - overlay-net 
+    ports:
+      - "28734:6379" # can remove this, if removed have to go inside the server container and connect there to access data
+    command: redis-server /data/redis.conf --loadmodule /usr/lib/redis/modules/rejson.so
+
+  redis-client:
+    image: iudx/redis-client:latest
+    volumes:
+      - type: bind
+        source: ./redis-client-reactive.py 
+        target: /usr/share/app/redis-client-reactive.py
+      - type: bind
+        source: ./attribute_list.json  
+        target: /usr/share/app/attribute_list.json
+    restart: on-failure
+    depends_on:
+      - "redis-server"
+    networks:
+      - overlay-net
+
+volumes:
+  redis-data:
