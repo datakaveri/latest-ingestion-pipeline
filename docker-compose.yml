@@ -12,11 +12,13 @@ services:
       - type: volume
         source: redis-data
         target: /data
+      - ./configs/redis.conf:/data/redis.conf
     restart: on-failure
     networks:
       - overlay-net 
     ports:
-      - "6379:6379" # can remove this, if removed have to go inside the server container and connect there to access data
+      - "28734:6379" # can remove this, if removed have to go inside the server container and connect there to access data
+    command: redis-server /data/redis.conf --loadmodule /usr/lib/redis/modules/rejson.so
 
   redis-client:
     image: iudx/redis-client:latest
