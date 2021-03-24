@@ -79,7 +79,7 @@ public class RabbitMQVerticle extends AbstractVerticle {
         rabbitProducer=new Producer(vertx, client);
         
         rabbitConsumer.start();
-        rabbitProducer.start();
+        //rabbitProducer.start(); 
       }else {
         LOGGER.info("Rabbit mq client startup failed");
         LOGGER.error(resultHandler.cause());

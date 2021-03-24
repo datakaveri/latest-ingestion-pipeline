@@ -13,10 +13,7 @@ public class RedisVerticle extends AbstractVerticle {
   public void start() throws Exception {
     RedisClient client =
         new RedisClient(vertx, config().getString("redisIp"), config().getInteger("redisPort"));
-    /*
-     * client.get("varanasi_env_aqm").onComplete(handler -> { if (handler.succeeded()) {
-     * System.out.println("found"); } else { System.out.println("not found"); } });
-     */
+
     redisProducer=new RedisProducer(vertx, client);
     redisProducer.start();
   }
