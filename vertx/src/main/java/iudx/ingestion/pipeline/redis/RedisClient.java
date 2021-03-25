@@ -47,7 +47,7 @@ public class RedisClient {
   public Future<Boolean> put(String key, String path, Object data) {
     Promise<Boolean> promise = Promise.promise();
     vertx.executeBlocking(redisSetJsonHandler -> {
-      if (put2Redis(key, path.toString(), data)) {
+      if (put2Redis(key, path, data)) {
         redisSetJsonHandler.complete();
       } else {
         redisSetJsonHandler.fail("nil failed");
@@ -86,7 +86,6 @@ public class RedisClient {
       System.out.println(ex);
       return Boolean.FALSE;
     }
-
   }
 
 }
