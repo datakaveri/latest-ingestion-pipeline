@@ -1,0 +1,9 @@
+# Python Packaging and Distributions
+
+env/
+
+# Logstash
+
+lib/
+docs/
+spec
