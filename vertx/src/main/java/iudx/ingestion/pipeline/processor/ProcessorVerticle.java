@@ -34,7 +34,8 @@ public class ProcessorVerticle extends AbstractVerticle {
   
   private Map<String,Object> loadMappingFile(){
    try {
-    String config = new String(Files.readAllBytes(Paths.get("configs/attribute-mapping.json")), StandardCharsets.UTF_8);
+     String config = new String(Files.readAllBytes(Paths.get("secrets/attribute-mapping.json")),
+         StandardCharsets.UTF_8);
     JsonObject json=new JsonObject(config);
     return json.getMap();
   } catch (IOException e) {

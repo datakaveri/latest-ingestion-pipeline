@@ -1,10 +1,5 @@
 {
 	"version": "1.0",
-	"zookeepers": [
-		"zookeeper"
-	],
-	"clusterId": "iudx-ingestion-pipeline-cluster",
-	"host": "server",
 	"modules": [
 		{
 			"id": "iudx.ingestion.pipeline.rabbitmq.RabbitMQVerticle",

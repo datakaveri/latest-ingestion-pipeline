@@ -61,7 +61,8 @@ public class DeployerDev {
   }
 
   public static void main(String[] args) {
-    CLI cli = CLI.create("IUDX ingestion").setSummary("A CLI to deploy the ingestion pipeline")
+    CLI cli = CLI.create("IUDX Latest Ingestion Pipeline")
+        .setSummary("A CLI to deploy the ingestion pipeline")
         .addOption(new Option().setLongName("help").setShortName("h").setFlag(true)
             .setDescription("display help"))
         .addOption(new Option().setLongName("config").setShortName("c")

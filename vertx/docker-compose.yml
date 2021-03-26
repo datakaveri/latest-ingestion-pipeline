@@ -1,0 +1,16 @@
+version: '3.7'
+services:
+  lip:
+    env_file:
+      - ./.lip.env
+    volumes:
+      - ./docs/:/usr/share/app/docs
+      - ./secrets/attribute-mapping.json:/usr/share/app/secrets/attribute-mapping.json
+    restart: always
+    logging:
+       driver: "json-file"
+       options:
+          max-file: "3"
+          max-size: "5m"
+    command: bash -c "exec java $$LIP_JAVA_OPTS  -jar ./fatjar.jar  --host $$(hostname) -c secrets/all-verticles-configs/config.json"
+
