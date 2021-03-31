@@ -1,4 +1,4 @@
-![IUDX](./images/IUDX.png)
+![IUDX](./images/iudx.png)
 # latest-ingestion-pipeline
 
 The new latest ingestion pipeline is designed to ingest data asynchrously into Redis Database. This pipeline would enable the [IUDX Resource Server](https://github.com/datakaveri/iudx-resource-server)  to serve latest data for IUDX specified resources that are available in the Database.
