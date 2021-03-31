@@ -7,12 +7,6 @@ The new latest ingestion pipeline is designed to ingest data asynchrously into R
 
 The implementation for retrieving latest data for IUDX resources in IUDX v2 gurantees performant retrieval of latest data from ElasticSearch Database which otherwise involved large computational overhead of sorting directly on the database (IUDX v1). This was not a desirable trait as the dataset became increasingly huge, sorting incurred huge latency in response.
 
-The pipeline is described below-
-
-<p align="center">
-<img src="./images/IP_Latest_Data_ES.png">
-</p>
- 
 The implementation consists of 3 main components-
 1. Rabbit MQ
 2. Logstash
@@ -67,10 +61,6 @@ A detailed explanation of the implementation can be found [here]("./vertx/README
 ## Reactive Pattern using aio_pika 
 
 The design is similar to the async Python + Aio_pika but the implemenation it follows the reactive pattern where we isolate and parallelize the IO and CPU bound computations. 
-
-### Issues
-
-- The program still has bugs and future releases would incorporate fixes and enhancements.
 
 ## Contributing
 We follow Git Merge based workflow 
