@@ -1,7 +1,7 @@
 ![IUDX](./images/iudx.png)
 # Latest Ingestion Pipeline
 
-The new latest ingestion pipeline is designed to ingest data asynchrously into Redis Database. This pipeline would enable the [IUDX Resource Server](https://github.com/datakaveri/iudx-resource-server)  to serve latest data for IUDX specified resources that are available in the Database.
+The new latest ingestion pipeline is designed to ingest data asynchronously into Redis Database. This pipeline would enable the [IUDX Resource Server](https://github.com/datakaveri/iudx-resource-server)  to serve latest data for IUDX specified resources that are available in the Database.
 
 ## Design Implementation for IUDX release v2:
 
@@ -68,7 +68,6 @@ We follow Git Merge based workflow
 2. Create a new feature branch in your fork. Multiple features must have a hyphen separated name, or refer to a milestone name as mentioned in Github -> Projects 
 3. Commit to your fork and raise a Pull Request with upstream
 4. If you find any issues with the implementation please raise an issue on Issues in GitHub.
-
 
 ## License
 [MIT](./LICENSE.txt)
