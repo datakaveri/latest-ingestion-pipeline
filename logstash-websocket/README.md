@@ -1,4 +1,3 @@
-![IUDX](./images/iudx.png)
 # Logstash Pipeline using Websocket Plugin
 
 The pipeline uses Logstash for ingestion using [Websocket output plugin](https://www.elastic.co/guide/en/logstash/current/plugins-outputs-websocket.html). The design architecture for the pipeline is described below-
