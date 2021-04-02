@@ -1,4 +1,16 @@
-# Logstash Plugin
+![IUDX](./images/iudx.png)
+# Logstash Pipeline using Websocket Plugin
+
+The pipeline uses Logstash for ingestion using [Websocket output plugin](https://www.elastic.co/guide/en/logstash/current/plugins-outputs-websocket.html). The design architecture for the pipeline is described below-
+
+# Design Architecture
+
+<p align="center">
+<img src="../images/logstash_websocket.png">
+</p>
+
+
+##  Logstash Plugin
 
 [![Travis Build Status](https://travis-ci.com/logstash-plugins/logstash-output-websocket.svg)](https://travis-ci.com/logstash-plugins/logstash-output-websocket)
 
@@ -87,6 +99,17 @@ bin/plugin install --no-verify
 ```
 - Start Logstash and proceed to test the plugin
 
+## Python Redis Client
+
+- The responsibilites of the client is to pull the data from the Websocket Server and extract a subset of information from the packet for creating the *Redis key* and *path parameter* for Redis Database. This key generation is done for every data packet that arrives at the client.
+- A few key pointers to keep in mind is that Redis does not support a wide variety of special characters in the *key* except *$,_*.
+- Once the key and path parameter is generated, we use the ReJSON package to insert the data into Redis.
+- If the key and path parameter is already present in Redis then the data is upserted.
+
+## Improvement
+
+The  proposed design can be improved by completely removing the websocket component and improving the Redis output plugin to include the *HashMap* data structure. In this way the ingestion can be facilitated from RabbitMQ to Redis directly. This fits well for our use case where the data structure is primarily of type JSON.
+ 
 ## Contributing
 
 All contributions are welcome: ideas, patches, documentation, bug reports, complaints, and even something you drew up on a napkin.
