@@ -22,13 +22,20 @@
 			"networkRecoveryInterval": 500,
 			"automaticRecoveryEnabled": true
 		},
-		{
-			"id": "iudx.ingestion.pipeline.redis.RedisVerticle",
-			"verticleInstances": 1,
-			"endpoint": "",
-			"redisIp":"",
-			"redisPort":1234
-		},
+                {
+                        "id": "iudx.ingestion.pipeline.redis.RedisVerticle",
+                        "verticleInstances": 1,
+                        "redisMode": "CLUSTER",
+                        "redisUsername": "xyz",
+                        "redisPassword": "abcd",
+                        "redisMaxPoolSize": 30,
+                        "redisMaxPoolWaiting": 200,
+                        "redisMaxWaitingHandlers": 1024,
+                        "redisPoolRecycleTimeout": 1500,
+                        "redisHost":"redis-redis-cluster.redis.svc.cluster.local",
+                        "redisPort": 6379
+                },
+
 		{
 			"id": "iudx.ingestion.pipeline.processor.ProcessorVerticle",
 			"verticleInstances": 1

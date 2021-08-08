@@ -12,7 +12,7 @@ public class RedisVerticle extends AbstractVerticle {
   @Override
   public void start() throws Exception {
     RedisClient client =
-        new RedisClient(vertx, config().getString("redisIp"), config().getInteger("redisPort"));
+        new RedisClient(vertx, config());
 
     redisProducer=new RedisProducer(vertx, client);
     redisProducer.start();

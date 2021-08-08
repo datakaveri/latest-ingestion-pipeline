@@ -1,91 +1,86 @@
 package iudx.ingestion.pipeline.redis;
 
-import java.util.Map;
-import com.redislabs.modules.rejson.JReJSON;
-import com.redislabs.modules.rejson.Path;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import io.vertx.core.Future;
 import io.vertx.core.Promise;
 import io.vertx.core.Vertx;
+
 import io.vertx.core.json.JsonObject;
+import io.vertx.redis.client.Command;
+import io.vertx.redis.client.Redis;
+import io.vertx.redis.client.RedisAPI;
+import io.vertx.redis.client.RedisOptions;
+import io.vertx.redis.client.RedisClientType;
+import io.vertx.redis.client.RedisSlaves;
 
 public class RedisClient {
 
-  private final Vertx vertx;
-  JReJSON client;
+  private Redis ClusteredClient;
+  private RedisAPI redis;
+  private static final Command JSONGET = Command.create("JSON.GET", -1, 1, 1, 1, true, false);
+  private static final Command JSONSET = Command.create("JSON.SET", -1, 1, 1, 1, false, false);
+  private static final Logger LOGGER = LogManager.getLogger(RedisClient.class);
 
+  public RedisClient(Vertx vertx, JsonObject config) {
+    StringBuilder RedisURI = new StringBuilder();
+    RedisOptions options;
+    RedisURI.append("redis://").append(config.getString("redisUsername")).append(":")
+        .append(config.getString("redisPassword")).append("@").append(config.getString("redisHost"))
+        .append(":")
+        .append(config.getInteger("redisPort").toString());
+    String mode = config.getString("redisMode");
+    if (mode.equals("CLUSTER")) {
+      options =
+          new RedisOptions().setType(RedisClientType.CLUSTER).setUseSlave(RedisSlaves.SHARE);
+    } else if (mode.equals("STANDALONE")) {
+      options =
+          new RedisOptions().setType(RedisClientType.STANDALONE);
+    }      
+    else {
+      LOGGER.error("Invalid/Unsupported mode");
+      return;
+    }
+      options.setMaxPoolSize(config.getInteger("redisMaxPoolSize"))
+      .setMaxPoolWaiting(config.getInteger("redisMaxPoolWaiting"))
+      .setMaxWaitingHandlers(config.getInteger("redisMaxWaitingHandlers"))
+      .setPoolRecycleTimeout(config.getInteger("redisPoolRecycleTimeout"))
+      .setConnectionString(RedisURI.toString());
 
-  public RedisClient(Vertx vertx, String ip, int port) {
-    this.vertx = vertx;
-    client = new JReJSON(ip, port);
+      ClusteredClient = Redis.createClient(vertx, options);
+      redis = RedisAPI.api(ClusteredClient);
+
   }
 
-
   public Future<JsonObject> get(String key) {
-    return get(key, Path.ROOT_PATH.toString());
+    return get(key, ".".toString());
   }
 
 
   public Future<JsonObject> get(String key, String path) {
     Promise<JsonObject> promise = Promise.promise();
-    vertx.executeBlocking(getFromRedisHandler -> {
-      JsonObject json = getFromRedis(key, path);
-      if (json == null) {
-        getFromRedisHandler.fail("nil");
+    redis.send(JSONGET, key, path).onFailure(res -> {
+      promise.fail(String.format("JSONGET did not work: %s", res.getCause()));
+    }).onSuccess(redisResponse -> {
+      if (redisResponse == null) {
+        promise.fail(String.format(" %s key not found", key));
       } else {
-        getFromRedisHandler.complete(json);
-      }
-    }, resultHandler -> {
-      if (resultHandler.succeeded()) {
-        promise.complete((JsonObject) resultHandler.result());
-      } else {
-        promise.fail(resultHandler.cause());
+        promise.complete(new JsonObject(redisResponse.toString()));
       }
     });
+
     return promise.future();
   }
 
-  public Future<Boolean> put(String key, String path, Object data) {
+  public Future<Boolean> put(String key, String path, String data) {
     Promise<Boolean> promise = Promise.promise();
-    vertx.executeBlocking(redisSetJsonHandler -> {
-      if (put2Redis(key, path, data)) {
-        redisSetJsonHandler.complete();
-      } else {
-        redisSetJsonHandler.fail("nil failed");
-        System.out.println("failed");
-      }
-    }, resultHandler -> {
-      if (resultHandler.succeeded()) {
-        promise.complete();
-      } else {
-        promise.fail("not able to set json");
-      }
+    LOGGER.debug(String.format("setting data: %s", data));
+    redis.send(JSONSET, key, path, data).onFailure(res -> {
+      promise.fail(String.format("JSONSET did not work: %s", res.getCause()));
+    }).onSuccess(redisResponse -> {
+      promise.complete();
     });
     return promise.future();
   }
 
-  private JsonObject getFromRedis(String key, String path) {
-    Map result = null;
-    try {
-      result = client.get(key, Map.class, new Path(path));
-      if (result != null) {
-        JsonObject res = new JsonObject(result);
-        return res;
-      } else {
-        return null;
-      }
-    } catch (Exception e) {
-      return null;
-    }
   }
-
-  private boolean put2Redis(String key, String path, Object data) {
-    try {
-      client.set(key, data, new Path(path));
-      return Boolean.TRUE;
-    } catch (Exception ex) {
-      System.out.println(ex);
-      return Boolean.FALSE;
-    }
-  }
-
-}
