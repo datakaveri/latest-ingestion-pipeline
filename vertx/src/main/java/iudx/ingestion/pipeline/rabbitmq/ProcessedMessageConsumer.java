@@ -1,6 +1,6 @@
 package iudx.ingestion.pipeline.rabbitmq;
 
-import static iudx.ingestion.pipeline.common.Constants.RMQ_LATEST_DATA_Q;
+import static iudx.ingestion.pipeline.common.Constants.RMQ_PROCESSED_DATA_Q;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -12,14 +12,14 @@ import io.vertx.rabbitmq.QueueOptions;
 import io.vertx.rabbitmq.RabbitMQClient;
 import io.vertx.rabbitmq.RabbitMQConsumer;
 import iudx.ingestion.pipeline.common.IConsumer;
-import iudx.ingestion.pipeline.processor.MessageProcessService;
+import iudx.ingestion.pipeline.redis.RedisService;
 
-class LatestMessageConsumer implements IConsumer {
+public class ProcessedMessageConsumer implements IConsumer {
 
-  private static final Logger LOGGER = LogManager.getLogger(LatestMessageConsumer.class);
+  private static final Logger LOGGER = LogManager.getLogger(ProcessedMessageConsumer.class);
 
   private final RabbitMQClient client;
-  private final MessageProcessService msgService;
+  private final RedisService redisService;
   private final Vertx vertx;
 
   private final QueueOptions options =
@@ -27,10 +27,10 @@ class LatestMessageConsumer implements IConsumer {
           .setMaxInternalQueueSize(1000)
           .setKeepMostRecent(true);
 
-  public LatestMessageConsumer(Vertx vertx, RabbitMQClient client, MessageProcessService msgService) {
+  public ProcessedMessageConsumer(Vertx vertx, RabbitMQClient client, RedisService redisService) {
     this.vertx = vertx;
     this.client = client;
-    this.msgService = msgService;
+    this.redisService = redisService;
   }
 
   @Override
@@ -40,23 +40,25 @@ class LatestMessageConsumer implements IConsumer {
 
 
   private void consume() {
-    client.basicConsumer(RMQ_LATEST_DATA_Q, options, receivedResultHandler -> {
+    client.basicConsumer(RMQ_PROCESSED_DATA_Q, options, receivedResultHandler -> {
       if (receivedResultHandler.succeeded()) {
         RabbitMQConsumer mqConsumer = receivedResultHandler.result();
         mqConsumer.handler(message -> {
           Buffer body = message.body();
           if (body != null) {
-            msgService.process(new JsonObject(body), handler -> {
+            JsonObject fromRMQ = new JsonObject(body);
+            String key = fromRMQ.getString("key");
+            String path = fromRMQ.getString("path_param");
+            String data = fromRMQ.getJsonObject("data").toString();
+            redisService.put(key, path, data, handler -> {
               if (handler.succeeded()) {
-                LOGGER.info("Messaged processed and published");
+                LOGGER.debug("Processed message pushed to redis");
               } else {
-                LOGGER.error("Error while processing message and publishing");
+                LOGGER.debug("redis push failed, " + handler.cause().getMessage());
               }
             });
           }
         });
-      } else {
-        LOGGER.error("error while consuming latest messages");
       }
     });
   }

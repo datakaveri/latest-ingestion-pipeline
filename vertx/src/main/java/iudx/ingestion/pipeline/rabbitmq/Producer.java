@@ -1,6 +1,9 @@
 package iudx.ingestion.pipeline.rabbitmq;
 
-import static iudx.ingestion.pipeline.common.Constants.*;
+import static iudx.ingestion.pipeline.common.Constants.EB_PROCESSED_MSG_ADDRESS;
+import static iudx.ingestion.pipeline.common.Constants.RMQ_PROCESSED_MSG_EX;
+import static iudx.ingestion.pipeline.common.Constants.RMQ_PROCESSED_MSG_EX_ROUTING_KEY;
+
 import io.vertx.core.Vertx;
 import io.vertx.core.json.JsonObject;
 import io.vertx.rabbitmq.RabbitMQClient;
