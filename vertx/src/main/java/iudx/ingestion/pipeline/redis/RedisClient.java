@@ -2,16 +2,16 @@ package iudx.ingestion.pipeline.redis;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+
 import io.vertx.core.Future;
 import io.vertx.core.Promise;
 import io.vertx.core.Vertx;
-
 import io.vertx.core.json.JsonObject;
 import io.vertx.redis.client.Command;
 import io.vertx.redis.client.Redis;
 import io.vertx.redis.client.RedisAPI;
-import io.vertx.redis.client.RedisOptions;
 import io.vertx.redis.client.RedisClientType;
+import io.vertx.redis.client.RedisOptions;
 import io.vertx.redis.client.RedisSlaves;
 
 public class RedisClient {
@@ -36,19 +36,18 @@ public class RedisClient {
     } else if (mode.equals("STANDALONE")) {
       options =
           new RedisOptions().setType(RedisClientType.STANDALONE);
-    }      
-    else {
+    } else {
       LOGGER.error("Invalid/Unsupported mode");
       return;
     }
-      options.setMaxPoolSize(config.getInteger("redisMaxPoolSize"))
-      .setMaxPoolWaiting(config.getInteger("redisMaxPoolWaiting"))
-      .setMaxWaitingHandlers(config.getInteger("redisMaxWaitingHandlers"))
-      .setPoolRecycleTimeout(config.getInteger("redisPoolRecycleTimeout"))
-      .setConnectionString(RedisURI.toString());
+    options.setMaxPoolSize(config.getInteger("redisMaxPoolSize"))
+        .setMaxPoolWaiting(config.getInteger("redisMaxPoolWaiting"))
+        .setMaxWaitingHandlers(config.getInteger("redisMaxWaitingHandlers"))
+        .setPoolRecycleTimeout(config.getInteger("redisPoolRecycleTimeout"))
+        .setConnectionString(RedisURI.toString());
 
-      ClusteredClient = Redis.createClient(vertx, options);
-      redis = RedisAPI.api(ClusteredClient);
+    ClusteredClient = Redis.createClient(vertx, options);
+    redis = RedisAPI.api(ClusteredClient);
 
   }
 
@@ -76,6 +75,7 @@ public class RedisClient {
     Promise<Boolean> promise = Promise.promise();
     LOGGER.debug(String.format("setting data: %s", data));
     redis.send(JSONSET, key, path, data).onFailure(res -> {
+      LOGGER.error(String.format("JSONSET did not work: %s", res.getMessage()));
       promise.fail(String.format("JSONSET did not work: %s", res.getCause()));
     }).onSuccess(redisResponse -> {
       promise.complete();
@@ -83,4 +83,4 @@ public class RedisClient {
     return promise.future();
   }
 
-  }
+}

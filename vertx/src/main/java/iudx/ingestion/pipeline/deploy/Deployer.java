@@ -9,13 +9,16 @@ import java.util.List;
 import java.util.Set;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
+
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.apache.logging.log4j.core.LoggerContext;
+
 import com.hazelcast.config.Config;
 import com.hazelcast.config.DiscoveryStrategyConfig;
 import com.hazelcast.zookeeper.ZookeeperDiscoveryProperties;
 import com.hazelcast.zookeeper.ZookeeperDiscoveryStrategyFactory;
+
 import io.micrometer.core.instrument.MeterRegistry;
 import io.micrometer.core.instrument.binder.jvm.JvmGcMetrics;
 import io.micrometer.core.instrument.binder.jvm.JvmMemoryMetrics;

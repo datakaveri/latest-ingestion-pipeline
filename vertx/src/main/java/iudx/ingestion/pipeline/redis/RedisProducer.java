@@ -1,10 +1,13 @@
 package iudx.ingestion.pipeline.redis;
 
 import static iudx.ingestion.pipeline.common.Constants.EB_PUBLISH_2_REDIS;
+
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeParseException;
+
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+
 import io.vertx.core.Vertx;
 import io.vertx.core.json.JsonObject;
 import iudx.ingestion.pipeline.common.IProducer;
