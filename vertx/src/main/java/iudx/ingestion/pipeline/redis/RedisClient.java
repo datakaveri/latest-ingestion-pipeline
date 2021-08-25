@@ -32,7 +32,7 @@ public class RedisClient {
     String mode = config.getString("redisMode");
     if (mode.equals("CLUSTER")) {
       options =
-          new RedisOptions().setType(RedisClientType.CLUSTER).setUseSlave(RedisSlaves.SHARE);
+          new RedisOptions().setType(RedisClientType.CLUSTER).setUseSlave(RedisSlaves.NEVER);
     } else if (mode.equals("STANDALONE")) {
       options =
           new RedisOptions().setType(RedisClientType.STANDALONE);
@@ -47,8 +47,9 @@ public class RedisClient {
         .setConnectionString(RedisURI.toString());
 
     ClusteredClient = Redis.createClient(vertx, options);
-    redis = RedisAPI.api(ClusteredClient);
-
+      ClusteredClient.connect(conn -> {
+        redis = RedisAPI.api(conn.result());
+      });
   }
 
   public Future<JsonObject> get(String key) {
@@ -59,7 +60,7 @@ public class RedisClient {
   public Future<JsonObject> get(String key, String path) {
     Promise<JsonObject> promise = Promise.promise();
     redis.send(JSONGET, key, path).onFailure(res -> {
-      promise.fail(String.format("JSONGET did not work: %s", res.getCause()));
+      promise.fail(String.format("JSONGET did not work: %s", res.getMessage()));
     }).onSuccess(redisResponse -> {
       if (redisResponse == null) {
         promise.fail(String.format(" %s key not found", key));
@@ -83,4 +84,9 @@ public class RedisClient {
     return promise.future();
   }
 
-}
+  public void close() {
+    redis.close();
+
+  }
+
+  }

@@ -30,7 +30,7 @@
                         "redisPassword": "abcd",
                         "redisMaxPoolSize": 30,
                         "redisMaxPoolWaiting": 200,
-                        "redisMaxWaitingHandlers": 1024,
+                        "redisMaxWaitingHandlers": 5000,
                         "redisPoolRecycleTimeout": 1500,
                         "redisHost":"redis-redis-cluster.redis.svc.cluster.local",
                         "redisPort": 6379

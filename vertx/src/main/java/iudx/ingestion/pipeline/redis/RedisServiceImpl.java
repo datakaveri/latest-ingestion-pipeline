@@ -107,8 +107,8 @@ public class RedisServiceImpl implements RedisService {
     boolean result = false;
     LOGGER.debug("from Redis : " + dateFromRedisData + " from Latest : " + dateFromLatestData);
     try {
-      LocalDateTime fromRedisData = LocalDateTime.parse(dateFromRedisData);
-      LocalDateTime fromLatestData = LocalDateTime.parse(dateFromLatestData);
+      ZonedDateTime fromRedisData = ZonedDateTime.parse(dateFromRedisData);
+      ZonedDateTime fromLatestData = ZonedDateTime.parse(dateFromLatestData);
 
       if (fromLatestData.isAfter(fromRedisData)) {
         LOGGER.info(result);
