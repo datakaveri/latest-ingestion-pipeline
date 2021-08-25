@@ -56,14 +56,6 @@ public class RedisServiceImpl implements RedisService {
 
       JsonObject response = new JsonObject().put("result", "published");
 
-      redisClient.get(key, pathParam.toString()).onComplete(redisHandler -> {
-        if (redisHandler.succeeded()) {
-          // key found
-          LOGGER.debug("key found : ");
-          JsonObject fromRedis = redisHandler.result();
-          LOGGER.debug("data : " + fromRedis.toString());
-          if (isValidMessage2Push(fromRedis, new JsonObject(data))) {
-
             redisClient.put(key, pathParam.toString(), data).onComplete(res -> {
               if (res.failed()) {
                 LOGGER.error(res.cause());
@@ -71,22 +63,7 @@ public class RedisServiceImpl implements RedisService {
                 handler.handle(Future.succeededFuture(response));
               }
             });
-          } else {
-            LOGGER.info("message rejected for being older than json in redis.");
-            handler.handle(Future.failedFuture("message rejected for being older than json in redis."));
-          }
-        } else {
-          LOGGER.debug("key not found : " + key);
-          redisClient.put(key, pathParam.toString(), data).onComplete(res -> {
-            if (res.failed()) {
-              LOGGER.error(res.cause());
-              handler.handle(Future.failedFuture("failed to publish message."));
-            } else {
-              handler.handle(Future.succeededFuture(response));
-            }
-          });
-        }
-      });
+
     } else {
       handler.handle(Future.failedFuture("null/empty message rejected."));
     }
