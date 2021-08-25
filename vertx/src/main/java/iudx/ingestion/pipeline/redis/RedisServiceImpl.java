@@ -71,33 +71,4 @@ public class RedisServiceImpl implements RedisService {
   }
 
 
-  /**
-   * check if message is valid through 'ObservationDateTime' field's in both messages.
-   * 
-   * @param fromRedis Json from Redis Cache.
-   * @param latestJson Json from EB.
-   * @return
-   */
-  private boolean isValidMessage2Push(JsonObject fromRedis, JsonObject latestJson) {
-    String dateFromRedisData = fromRedis.getString("observationDateTime");
-    String dateFromLatestData = latestJson.getString("observationDateTime");
-    boolean result = false;
-    LOGGER.debug("from Redis : " + dateFromRedisData + " from Latest : " + dateFromLatestData);
-    try {
-      ZonedDateTime fromRedisData = ZonedDateTime.parse(dateFromRedisData);
-      ZonedDateTime fromLatestData = ZonedDateTime.parse(dateFromLatestData);
-
-      if (fromLatestData.isAfter(fromRedisData)) {
-        LOGGER.info(result);
-        result = true;
-      }
-    } catch (DateTimeParseException e) {
-      LOGGER.error("parse exception : " + e.getMessage());
-      result = false;
-    }
-    return result;
-  }
-
-
-
 }
