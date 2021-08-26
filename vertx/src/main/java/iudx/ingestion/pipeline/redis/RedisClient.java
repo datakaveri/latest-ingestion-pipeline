@@ -27,29 +27,23 @@ public class RedisClient {
     RedisOptions options;
     RedisURI.append("redis://").append(config.getString("redisUsername")).append(":")
         .append(config.getString("redisPassword")).append("@").append(config.getString("redisHost"))
-        .append(":")
-        .append(config.getInteger("redisPort").toString());
+        .append(":").append(config.getInteger("redisPort").toString());
     String mode = config.getString("redisMode");
     if (mode.equals("CLUSTER")) {
-      options =
-          new RedisOptions().setType(RedisClientType.CLUSTER).setUseSlave(RedisSlaves.NEVER);
+      options = new RedisOptions().setType(RedisClientType.CLUSTER).setUseSlave(RedisSlaves.NEVER);
     } else if (mode.equals("STANDALONE")) {
-      options =
-          new RedisOptions().setType(RedisClientType.STANDALONE);
+      options = new RedisOptions().setType(RedisClientType.STANDALONE);
     } else {
       LOGGER.error("Invalid/Unsupported mode");
       return;
     }
-    options.setMaxPoolSize(config.getInteger("redisMaxPoolSize"))
-        .setMaxPoolWaiting(config.getInteger("redisMaxPoolWaiting"))
-        .setMaxWaitingHandlers(config.getInteger("redisMaxWaitingHandlers"))
-        .setPoolRecycleTimeout(config.getInteger("redisPoolRecycleTimeout"))
+    options.setMaxWaitingHandlers(config.getInteger("redisMaxWaitingHandlers"))
         .setConnectionString(RedisURI.toString());
 
     ClusteredClient = Redis.createClient(vertx, options);
-      ClusteredClient.connect(conn -> {
-        redis = RedisAPI.api(conn.result());
-      });
+    ClusteredClient.connect(conn -> {
+      redis = RedisAPI.api(conn.result());
+    });
   }
 
   public Future<JsonObject> get(String key) {
@@ -89,4 +83,4 @@ public class RedisClient {
 
   }
 
-  }
+}

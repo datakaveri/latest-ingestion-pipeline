@@ -24,12 +24,11 @@ public class RedisServiceImpl implements RedisService {
 
   @Override
   public RedisService get(String key, String path, Handler<AsyncResult<JsonObject>> handler) {
-    redisClient.get(key, path)
-        .onSuccess(successHandler -> {
-          handler.handle(Future.succeededFuture(successHandler));
-        }).onFailure(failureHandler -> {
-          handler.handle(Future.failedFuture(failureHandler));
-        });
+    redisClient.get(key, path).onSuccess(successHandler -> {
+      handler.handle(Future.succeededFuture(successHandler));
+    }).onFailure(failureHandler -> {
+      handler.handle(Future.failedFuture(failureHandler));
+    });
     return this;
   }
 
