@@ -1,8 +1,8 @@
 package iudx.ingestion.pipeline.redis;
 
 import java.time.LocalDateTime;
-import java.time.ZonedDateTime;
 import java.time.format.DateTimeParseException;
+import java.util.List;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -46,8 +46,7 @@ public class RedisServiceImpl implements RedisService {
 
     if (data != null) {
       StringBuilder pathParam = new StringBuilder();
-      pathParam.append(".")
-          .append(key)
+      pathParam
           .append(".")
           .append(path);
 
