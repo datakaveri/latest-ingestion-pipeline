@@ -13,10 +13,11 @@ public class RedisVerticle extends AbstractVerticle {
   private ServiceBinder binder;
   private MessageConsumer<JsonObject> consumer;
 
+  private RedisClient client;
 
   @Override
   public void start() throws Exception {
-    RedisClient client = new RedisClient(vertx, config());
+    client = new RedisClient(vertx, config());
 
     redisService = new RedisServiceImpl(client);
     binder = new ServiceBinder(vertx);
@@ -28,4 +29,7 @@ public class RedisVerticle extends AbstractVerticle {
 
   }
 
+  public void stop() {
+    client.close();
+  }
 }

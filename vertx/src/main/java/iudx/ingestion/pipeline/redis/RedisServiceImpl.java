@@ -24,12 +24,11 @@ public class RedisServiceImpl implements RedisService {
 
   @Override
   public RedisService get(String key, String path, Handler<AsyncResult<JsonObject>> handler) {
-    redisClient.get(key, path)
-        .onSuccess(successHandler -> {
-          handler.handle(Future.succeededFuture(successHandler));
-        }).onFailure(failureHandler -> {
-          handler.handle(Future.failedFuture(failureHandler));
-        });
+    redisClient.get(key, path).onSuccess(successHandler -> {
+      handler.handle(Future.succeededFuture(successHandler));
+    }).onFailure(failureHandler -> {
+      handler.handle(Future.failedFuture(failureHandler));
+    });
     return this;
   }
 
@@ -56,14 +55,6 @@ public class RedisServiceImpl implements RedisService {
 
       JsonObject response = new JsonObject().put("result", "published");
 
-      redisClient.get(key, pathParam.toString()).onComplete(redisHandler -> {
-        if (redisHandler.succeeded()) {
-          // key found
-          LOGGER.debug("key found : ");
-          JsonObject fromRedis = redisHandler.result();
-          LOGGER.debug("data : " + fromRedis.toString());
-          if (isValidMessage2Push(fromRedis, new JsonObject(data))) {
-
             redisClient.put(key, pathParam.toString(), data).onComplete(res -> {
               if (res.failed()) {
                 LOGGER.error(res.cause());
@@ -71,56 +62,12 @@ public class RedisServiceImpl implements RedisService {
                 handler.handle(Future.succeededFuture(response));
               }
             });
-          } else {
-            LOGGER.info("message rejected for being older than json in redis.");
-            handler.handle(Future.failedFuture("message rejected for being older than json in redis."));
-          }
-        } else {
-          LOGGER.debug("key not found : " + key);
-          redisClient.put(key, pathParam.toString(), data).onComplete(res -> {
-            if (res.failed()) {
-              LOGGER.error(res.cause());
-              handler.handle(Future.failedFuture("failed to publish message."));
-            } else {
-              handler.handle(Future.succeededFuture(response));
-            }
-          });
-        }
-      });
+
     } else {
       handler.handle(Future.failedFuture("null/empty message rejected."));
     }
     return this;
   }
-
-
-  /**
-   * check if message is valid through 'ObservationDateTime' field's in both messages.
-   * 
-   * @param fromRedis Json from Redis Cache.
-   * @param latestJson Json from EB.
-   * @return
-   */
-  private boolean isValidMessage2Push(JsonObject fromRedis, JsonObject latestJson) {
-    String dateFromRedisData = fromRedis.getString("observationDateTime");
-    String dateFromLatestData = latestJson.getString("observationDateTime");
-    boolean result = false;
-    LOGGER.debug("from Redis : " + dateFromRedisData + " from Latest : " + dateFromLatestData);
-    try {
-      LocalDateTime fromRedisData = LocalDateTime.parse(dateFromRedisData);
-      LocalDateTime fromLatestData = LocalDateTime.parse(dateFromLatestData);
-
-      if (fromLatestData.isAfter(fromRedisData)) {
-        LOGGER.info(result);
-        result = true;
-      }
-    } catch (DateTimeParseException e) {
-      LOGGER.error("parse exception : " + e.getMessage());
-      result = false;
-    }
-    return result;
-  }
-
 
 
 }
