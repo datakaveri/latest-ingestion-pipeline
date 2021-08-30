@@ -77,8 +77,7 @@ public class RedisClient {
     LOGGER.debug(String.format("setting data: %s", data));
     redis.send(JSONSET, key, path, data).onFailure(res -> {
       LOGGER.error(String.format("JSONSET did not work: %s", res.getMessage()));
-      LOGGER.error(String.format("JSONSET did not work: %s", res.getCause()));
-      promise.fail(String.format("JSONSET did not work: %s", res.getCause()));
+      promise.fail(String.format("JSONSET did not work: %s", res.getMessage()));
     }).onSuccess(redisResponse -> {
       promise.complete();
     });
@@ -94,7 +93,7 @@ public class RedisClient {
 
   public Future<List<String>> getAllKeys() {
     Promise<List<String>> promise = Promise.promise();
-    LOGGER.debug("getting all keys");
+    LOGGER.debug("getting all keys" + redis);
     redis.keys("*", handler -> {
       if (handler.succeeded()) {
         LOGGER.debug("handler : " + handler.toString());
@@ -108,19 +107,19 @@ public class RedisClient {
     });
     return promise.future();
   }
-  
-  
-//  public Future<Boolean> put(String key, String path, Object data) {
-//    Promise<Boolean> promise = Promise.promise();
-//    LOGGER.debug(String.format("setting data: %s", data));
-//    redis.send(JSONSET, key, path, data).onFailure(res -> {
-//      LOGGER.error(String.format("JSONSET did not work: %s", res.getMessage()));
-//      LOGGER.error(String.format("JSONSET did not work: %s", res.getCause()));
-//      promise.fail(String.format("JSONSET did not work: %s", res.getCause()));
-//    }).onSuccess(redisResponse -> {
-//      promise.complete();
-//    });
-//    return promise.future();
-//  }
+
+
+  // public Future<Boolean> put(String key, String path, Object data) {
+  // Promise<Boolean> promise = Promise.promise();
+  // LOGGER.debug(String.format("setting data: %s", data));
+  // redis.send(JSONSET, key, path, data).onFailure(res -> {
+  // LOGGER.error(String.format("JSONSET did not work: %s", res.getMessage()));
+  // LOGGER.error(String.format("JSONSET did not work: %s", res.getCause()));
+  // promise.fail(String.format("JSONSET did not work: %s", res.getCause()));
+  // }).onSuccess(redisResponse -> {
+  // promise.complete();
+  // });
+  // return promise.future();
+  // }
 
 }

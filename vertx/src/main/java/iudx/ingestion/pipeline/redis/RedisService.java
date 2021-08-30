@@ -1,5 +1,7 @@
 package iudx.ingestion.pipeline.redis;
 
+import java.util.List;
+
 import io.vertx.codegen.annotations.Fluent;
 import io.vertx.codegen.annotations.GenIgnore;
 import io.vertx.codegen.annotations.ProxyGen;
@@ -18,6 +20,9 @@ public interface RedisService {
 
   @Fluent
   RedisService put(final String key, final String path, final String data, Handler<AsyncResult<JsonObject>> handler);
+
+  @Fluent
+  RedisService getAllkeys(Handler<AsyncResult<List<String>>> handler);
 
   @GenIgnore
   static RedisService createProxy(Vertx vertx, String address) {

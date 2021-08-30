@@ -28,15 +28,15 @@
 			"redisMaxWaitingHandlers": 1024,
 			"redisPoolRecycleTimeout": 1500,
 			"redisHost": "redis-redis-cluster.redis.svc.cluster.local",
-			"redisPort": 6379,
-			"catalogueHost": "",
-			"cataloguePort": 443,
-			"keystore": "",
-			"keystorePassword": ""
+			"redisPort": 6379
 		},
 		{
 			"id": "iudx.ingestion.pipeline.processor.ProcessorVerticle",
-			"verticleInstances": 1
+			"verticleInstances": 1,
+            "catalogueHost": "",
+            "cataloguePort": 443,
+            "keystore": "",
+            "keystorePassword": ""
 		}
 	]
 }

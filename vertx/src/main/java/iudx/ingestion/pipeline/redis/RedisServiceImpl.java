@@ -1,7 +1,5 @@
 package iudx.ingestion.pipeline.redis;
 
-import java.time.LocalDateTime;
-import java.time.format.DateTimeParseException;
 import java.util.List;
 
 import org.apache.logging.log4j.LogManager;
@@ -32,15 +30,6 @@ public class RedisServiceImpl implements RedisService {
     return this;
   }
 
-  // TODO :
-  // 1.) Ensure a key entry is there for all resource groups available in catalogue (through init
-  // method @startup)
-  // 2.) Design a system to periodically matches key from Redis to Resource Groups from catalogue
-  // service to
-  // discover any new key available which needs to be created in Redis,
-  // CHALLENGES :
-  // - where this cron service should reside in muti verticle system since only one call is needed to
-  // this cron service.
   @Override
   public RedisService put(String key, String path, String data, Handler<AsyncResult<JsonObject>> handler) {
 
@@ -54,17 +43,30 @@ public class RedisServiceImpl implements RedisService {
 
       JsonObject response = new JsonObject().put("result", "published");
 
-            redisClient.put(key, pathParam.toString(), data).onComplete(res -> {
-              if (res.failed()) {
-                LOGGER.error(res.cause());
-              } else {
-                handler.handle(Future.succeededFuture(response));
-              }
-            });
+      redisClient.put(key, pathParam.toString(), data).onComplete(res -> {
+        if (res.failed()) {
+          LOGGER.error(res.cause());
+        } else {
+          handler.handle(Future.succeededFuture(response));
+        }
+      });
 
     } else {
       handler.handle(Future.failedFuture("null/empty message rejected."));
     }
+    return this;
+  }
+
+
+  @Override
+  public RedisService getAllkeys(Handler<AsyncResult<List<String>>> handler) {
+    redisClient.getAllKeys().onComplete(res -> {
+      if (res.succeeded()) {
+        handler.handle(Future.succeededFuture(res.result()));
+      } else {
+        LOGGER.error(res.cause());
+      }
+    });
     return this;
   }
 
