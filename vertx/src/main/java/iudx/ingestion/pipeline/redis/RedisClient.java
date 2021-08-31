@@ -23,14 +23,23 @@ public class RedisClient {
 
   private Redis ClusteredClient;
   private RedisAPI redis;
+  private Vertx vertx;
+  private JsonObject config;
   private static final Command JSONGET = Command.create("JSON.GET", -1, 1, 1, 1, true, false);
   private static final Command JSONSET = Command.create("JSON.SET", -1, 1, 1, 1, false, false);
 
   private static final Logger LOGGER = LogManager.getLogger(RedisClient.class);
 
   public RedisClient(Vertx vertx, JsonObject config) {
+    this.vertx = vertx;
+    this.config = config;
+  }
+
+
+  public Future<RedisClient> start() {
+    Promise<RedisClient> promise = Promise.promise();
     StringBuilder RedisURI = new StringBuilder();
-    RedisOptions options;
+    RedisOptions options = null;
     RedisURI.append("redis://").append(config.getString("redisUsername")).append(":")
         .append(config.getString("redisPassword")).append("@").append(config.getString("redisHost"))
         .append(":").append(config.getInteger("redisPort").toString());
@@ -41,7 +50,7 @@ public class RedisClient {
       options = new RedisOptions().setType(RedisClientType.STANDALONE);
     } else {
       LOGGER.error("Invalid/Unsupported mode");
-      return;
+      promise.fail("Invalid/Unsupported mode");
     }
     options.setMaxWaitingHandlers(config.getInteger("redisMaxWaitingHandlers"))
         .setConnectionString(RedisURI.toString());
@@ -49,7 +58,9 @@ public class RedisClient {
     ClusteredClient = Redis.createClient(vertx, options);
     ClusteredClient.connect(conn -> {
       redis = RedisAPI.api(conn.result());
+      promise.complete(this);
     });
+    return promise.future();
   }
 
   public Future<JsonObject> get(String key) {
