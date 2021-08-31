@@ -45,19 +45,17 @@ public class RedisVerticle extends AbstractVerticle {
         .onSuccess(handler -> {
           client = handler;
           redisService = new RedisServiceImpl(client);
+
+          binder = new ServiceBinder(vertx);
+          consumer = binder
+              .setAddress(REDIS_SERVICE_ADDRESS)
+              .register(RedisService.class, redisService);
           // initialize and check whether all catalogue RG corresponding keys are present or not, if not then
           // create a key in redis.
           initialize();
         }).onFailure(handler -> {
           LOGGER.error("failed to start redis client");
         });
-
-
-    binder = new ServiceBinder(vertx);
-
-    consumer = binder
-        .setAddress(REDIS_SERVICE_ADDRESS)
-        .register(RedisService.class, redisService);
 
     WebClientOptions options = new WebClientOptions();
     options.setTrustAll(true)
