@@ -13,7 +13,7 @@ import io.vertx.core.json.JsonObject;
 import iudx.ingestion.pipeline.common.IProducer;
 
 
-
+@Deprecated
 class RedisProducer implements IProducer {
 
   private final Vertx vertx;

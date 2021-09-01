@@ -9,6 +9,7 @@ import io.vertx.core.json.JsonObject;
 import io.vertx.rabbitmq.RabbitMQClient;
 import iudx.ingestion.pipeline.common.IProducer;
 
+@Deprecated
 class Producer implements IProducer {
 
   private final RabbitMQClient client;

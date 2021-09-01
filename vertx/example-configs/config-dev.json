@@ -4,7 +4,6 @@
 		{
 			"id": "iudx.ingestion.pipeline.rabbitmq.RabbitMQVerticle",
 			"verticleInstances": 1,
-			
 			"dataBrokerIP": "",
 			"dataBrokerPort": 1234,
 			"dataBrokerVhost": "",
@@ -18,17 +17,21 @@
 			"networkRecoveryInterval": 500,
 			"automaticRecoveryEnabled": true
 		},
-                {
-                        "id": "iudx.ingestion.pipeline.redis.RedisVerticle",
-                        "verticleInstances": 1,
-                        "redisMode": "CLUSTER",
-                        "redisUsername": "xyz",
-                        "redisPassword": "abcd",
-                        "redisMaxWaitingHandlers": 5000,
-                        "redisHost":"redis-redis-cluster.redis.svc.cluster.local",
-                        "redisPort": 6379
-                },
-
+		{
+			"id": "iudx.ingestion.pipeline.redis.RedisVerticle",
+			"verticleInstances": 1,
+			"redisMode": "CLUSTER",
+			"redisUsername": "xyz",
+			"redisPassword": "abcd",
+			"redisMaxPoolSize": 30,
+			"redisMaxPoolWaiting": 200,
+			"redisMaxWaitingHandlers": 1024,
+			"redisPoolRecycleTimeout": 1500,
+			"redisHost": "redis-redis-cluster.redis.svc.cluster.local",
+			"redisPort": 6379,
+			"catalogueHost": "",
+			"cataloguePort": 443
+		},
 		{
 			"id": "iudx.ingestion.pipeline.processor.ProcessorVerticle",
 			"verticleInstances": 1
