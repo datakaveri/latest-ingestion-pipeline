@@ -120,4 +120,9 @@ public class RabbitMQVerticle extends AbstractVerticle {
 
 
   }
+
+  @Override
+  public void stop() {
+    binder.unregister(consumer);
+  }
 }

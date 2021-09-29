@@ -121,11 +121,12 @@ public class RedisVerticle extends AbstractVerticle {
         .collect(Collectors.toSet());
   }
 
-
+  @Override
   public void stop() {
     if (client != null) {
       client.close();
     }
+    binder.unregister(consumer);
   }
 
 }
