@@ -74,4 +74,9 @@ public class ProcessorVerticle extends AbstractVerticle {
     }
     return new HashMap<String, Object>();
   }
+
+  @Override
+  public void stop() {
+    binder.unregister(consumer);
+  }
 }

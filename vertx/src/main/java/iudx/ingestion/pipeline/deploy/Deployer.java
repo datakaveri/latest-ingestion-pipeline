@@ -168,7 +168,7 @@ public class Deployer {
       LOGGER.info("All the verticles undeployed");
       mgr.leave(handler -> {
         if (handler.succeeded()) {
-          LOGGER.info("Hazelcast succesfully left:");
+          LOGGER.info("vertx succesfully left cluster");
           latch_cluster.countDown();
 
         } else {
