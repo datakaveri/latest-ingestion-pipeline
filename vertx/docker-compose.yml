@@ -4,7 +4,6 @@ services:
     env_file:
       - ./.lip.env
     volumes:
-      - ./docs/:/usr/share/app/docs
       - ./secrets/attribute-mapping.json:/usr/share/app/secrets/attribute-mapping.json
     restart: always
     logging:
