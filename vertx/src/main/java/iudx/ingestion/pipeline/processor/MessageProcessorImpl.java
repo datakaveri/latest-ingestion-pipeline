@@ -65,6 +65,7 @@ public class MessageProcessorImpl implements MessageProcessService {
       pathParam.append("_").append(idSHA).append(defaultAttribValue);
     } else {
       String value = (String) json.getString(pathParamAttribute);
+      value=value!=null?value.replaceAll("\\s", ""):"";
       pathParam.append("_").append(idSHA).append("_").append(value);
     }
     ProcessedMessage message =
@@ -89,4 +90,5 @@ public class MessageProcessorImpl implements MessageProcessService {
       this.data = data;
     }
   }
+  
 }
