@@ -47,7 +47,7 @@ public class MessageProcessorImpl implements MessageProcessService {
           LOGGER.info("published");
           handler.handle(Future.succeededFuture(new JsonObject().put("result", "published")));
         } else {
-          LOGGER.error("published failed"+ publishHandler.cause().getMessage());
+          LOGGER.error("published failed" + publishHandler.cause().getMessage());
           handler.handle(Future.failedFuture("publish failed"));
         }
       });
@@ -59,9 +59,9 @@ public class MessageProcessorImpl implements MessageProcessService {
   private ProcessedMessage getProcessedMessage(JsonObject json) {
     String id = json.getString("id");
     String idSHA = DigestUtils.shaHex(id);
-    String[] idComponents = id.split("/");
-    String groupId = idComponents[3];
-    String pathParamAttribute = (String) mappings.get(groupId);
+    // String[] idComponents = id.split("/");
+    // String groupId = idComponents[3];
+    String pathParamAttribute = (String) mappings.get(id);
     StringBuilder pathParam = new StringBuilder();
     if (pathParamAttribute == null || pathParamAttribute.isBlank()) {
       pathParam.append("_").append(idSHA).append(defaultAttribValue);
@@ -69,7 +69,10 @@ public class MessageProcessorImpl implements MessageProcessService {
       String value = (String) json.getString(pathParamAttribute);
       pathParam.append("_").append(idSHA).append("_").append(value);
     }
-    ProcessedMessage message = new ProcessedMessage(groupId.replaceAll("-", "_"), pathParam.toString(), json);
+    ProcessedMessage message =
+        new ProcessedMessage(id.replaceAll("/", "_")
+                               .replaceAll("-", "_")
+                               .replaceAll("\\.", "_"), pathParam.toString(), json);
     return message;
   }
 
