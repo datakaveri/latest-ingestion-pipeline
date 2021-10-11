@@ -105,6 +105,8 @@ public class RedisClient {
         promise.fail(String.format("JSONSET did not work: %s", res.getMessage()));
       }).onSuccess(redisResponse -> {
         promise.complete();
+      }).onFailure(handler->{
+        promise.fail("fail to push message");
       });
     } else {
       JsonObject origin = new JsonObject();
