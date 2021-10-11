@@ -2,10 +2,15 @@ package iudx.ingestion.pipeline.redis;
 
 import java.util.Arrays;
 import java.util.List;
+import java.util.Set;
+import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+
+import com.google.common.cache.Cache;
+import com.google.common.cache.CacheBuilder;
 
 import io.vertx.core.Future;
 import io.vertx.core.Promise;
@@ -17,18 +22,23 @@ import io.vertx.redis.client.RedisAPI;
 import io.vertx.redis.client.RedisClientType;
 import io.vertx.redis.client.RedisOptions;
 import io.vertx.redis.client.RedisSlaves;
-import io.vertx.redis.client.impl.types.MultiType;
 
 public class RedisClient {
 
   private Redis ClusteredClient;
   private RedisAPI redis;
-  private Vertx vertx;
-  private JsonObject config;
+  private final Vertx vertx;
+  private final JsonObject config;
   private static final Command JSONGET = Command.create("JSON.GET", -1, 1, 1, 1, true, false);
   private static final Command JSONSET = Command.create("JSON.SET", -1, 1, 1, 1, false, false);
 
   private static final Logger LOGGER = LogManager.getLogger(RedisClient.class);
+
+  private static Cache<String, String> redisKeyCache = CacheBuilder.newBuilder()
+      .maximumSize(5000)
+      .expireAfterAccess(60, TimeUnit.MINUTES)
+      .build();
+
 
   public RedisClient(Vertx vertx, JsonObject config) {
     this.vertx = vertx;
@@ -58,6 +68,7 @@ public class RedisClient {
     ClusteredClient = Redis.createClient(vertx, options);
     ClusteredClient.connect(conn -> {
       redis = RedisAPI.api(conn.result());
+      this.initKeysCache();
       promise.complete(this);
     });
     return promise.future();
@@ -86,24 +97,43 @@ public class RedisClient {
   public Future<Boolean> put(String key, String path, String data) {
     Promise<Boolean> promise = Promise.promise();
     LOGGER.debug(String.format("setting data: %s", data));
-    redis.send(JSONSET, key, path, data).onFailure(res -> {
-      LOGGER.error(String.format("JSONSET did not work: %s", res.getMessage()));
-      promise.fail(String.format("JSONSET did not work: %s", res.getMessage()));
-    }).onSuccess(redisResponse -> {
-      promise.complete();
-    });
+    LOGGER.info("key : " + key);
+    String keyInRedis = redisKeyCache.getIfPresent(key);
+    if (keyInRedis != null) {
+      redis.send(JSONSET, key, path, data).onFailure(res -> {
+        LOGGER.error(String.format("JSONSET did not work: %s", res.getMessage()));
+        promise.fail(String.format("JSONSET did not work: %s", res.getMessage()));
+      }).onSuccess(redisResponse -> {
+        promise.complete();
+      });
+    } else {
+      JsonObject origin = new JsonObject();
+      JsonObject pathJson = new JsonObject();
+      pathJson.put("_init_d", new JsonObject());
+      origin.put(key, pathJson);
+      redis.send(JSONSET, key, ".", origin.toString())
+          .compose(keyCreatedHandler -> {
+            redisKeyCache.put(key, "TRUE");
+            return redis.send(JSONSET, key, path, data);
+          }).onSuccess(handler -> {
+            LOGGER.info("Message pushed to Redis.");
+            promise.complete(true);
+          }).onFailure(handler -> {
+            LOGGER.error("fail to push message to Redis [either key not present & fail to create key]");
+            promise.fail("fail to push message");
+          });
+    }
     return promise.future();
   }
 
   public void close() {
     redis.close();
-
   }
 
 
 
-  public Future<List<String>> getAllKeys() {
-    Promise<List<String>> promise = Promise.promise();
+  public Future<Set<String>> getAllKeys() {
+    Promise<Set<String>> promise = Promise.promise();
     LOGGER.debug("getting all keys" + redis);
     redis.keys("*", handler -> {
       if (handler.succeeded()) {
@@ -111,8 +141,9 @@ public class RedisClient {
         List<String> list =
             Arrays.asList(handler.result().toString().replaceAll("\\[", "").replaceAll("\\]", "").split(","));
 
-        promise.complete(list.stream().map(e -> e.trim()).collect(Collectors.toList()));
+        promise.complete(list.stream().map(e -> e.trim()).collect(Collectors.toSet()));
       } else {
+        LOGGER.error("faile to get Keys from Redis");
         promise.fail("failed to get keys " + handler.cause());
       }
     });
@@ -120,17 +151,14 @@ public class RedisClient {
   }
 
 
-  // public Future<Boolean> put(String key, String path, Object data) {
-  // Promise<Boolean> promise = Promise.promise();
-  // LOGGER.debug(String.format("setting data: %s", data));
-  // redis.send(JSONSET, key, path, data).onFailure(res -> {
-  // LOGGER.error(String.format("JSONSET did not work: %s", res.getMessage()));
-  // LOGGER.error(String.format("JSONSET did not work: %s", res.getCause()));
-  // promise.fail(String.format("JSONSET did not work: %s", res.getCause()));
-  // }).onSuccess(redisResponse -> {
-  // promise.complete();
-  // });
-  // return promise.future();
-  // }
-
+  private void initKeysCache() {
+    getAllKeys().onSuccess(handler -> {
+      Set<String> keys = handler;
+      keys.forEach(key -> {
+        redisKeyCache.put(key, "TRUE");
+      });
+    }).onFailure(handler -> {
+      LOGGER.error("Failed to get all Keys from Redis");
+    });
+  }
 }

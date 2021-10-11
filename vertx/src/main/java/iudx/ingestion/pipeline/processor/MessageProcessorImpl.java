@@ -59,8 +59,6 @@ public class MessageProcessorImpl implements MessageProcessService {
   private ProcessedMessage getProcessedMessage(JsonObject json) {
     String id = json.getString("id");
     String idSHA = DigestUtils.shaHex(id);
-    // String[] idComponents = id.split("/");
-    // String groupId = idComponents[3];
     String pathParamAttribute = (String) mappings.get(id);
     StringBuilder pathParam = new StringBuilder();
     if (pathParamAttribute == null || pathParamAttribute.isBlank()) {
