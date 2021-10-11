@@ -1,6 +1,6 @@
 package iudx.ingestion.pipeline.redis;
 
-import java.util.List;
+import java.util.Set;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -59,7 +59,7 @@ public class RedisServiceImpl implements RedisService {
 
 
   @Override
-  public RedisService getAllkeys(Handler<AsyncResult<List<String>>> handler) {
+  public RedisService getAllkeys(Handler<AsyncResult<Set<String>>> handler) {
     redisClient.getAllKeys().onComplete(res -> {
       if (res.succeeded()) {
         handler.handle(Future.succeededFuture(res.result()));
@@ -69,6 +69,5 @@ public class RedisServiceImpl implements RedisService {
     });
     return this;
   }
-
 
 }
