@@ -29,9 +29,7 @@
 			"redisPassword": "abcd",
 			"redisMaxWaitingHandlers": 5000,
 			"redisHost": "redis-redis-cluster.redis.svc.cluster.local",
-			"redisPort": 6379,
-			"catalogueHost": "",
-			"cataloguePort": 443
+			"redisPort": 6379
 		},
 		{
 			"id": "iudx.ingestion.pipeline.processor.ProcessorVerticle",
