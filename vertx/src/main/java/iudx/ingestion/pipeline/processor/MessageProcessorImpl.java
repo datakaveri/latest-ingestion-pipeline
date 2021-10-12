@@ -57,21 +57,21 @@ public class MessageProcessorImpl implements MessageProcessService {
   }
 
   private ProcessedMessage getProcessedMessage(JsonObject json) {
-    String id = json.getString("id");
-    String idSHA = DigestUtils.shaHex(id);
-    String pathParamAttribute = (String) mappings.get(id);
+    StringBuilder id = new StringBuilder(json.getString("id"));
+    String pathParamAttribute = (String) mappings.get(id.toString());
     StringBuilder pathParam = new StringBuilder();
     if (pathParamAttribute == null || pathParamAttribute.isBlank()) {
-      pathParam.append("_").append(idSHA).append(defaultAttribValue);
+      id.append("/").append(defaultAttribValue);
+      pathParam.append("_").append(DigestUtils.shaHex(id.toString()));
     } else {
       String value = (String) json.getString(pathParamAttribute);
-      value=value!=null?value.replaceAll("\\s", ""):"";
-      pathParam.append("_").append(idSHA).append("_").append(value);
+      id.append("/").append(value);
+      pathParam.append("_").append(DigestUtils.shaHex(id.toString()));
     }
     ProcessedMessage message =
-        new ProcessedMessage(id.replaceAll("/", "_")
-                               .replaceAll("-", "_")
-                               .replaceAll("\\.", "_"), pathParam.toString(), json);
+        new ProcessedMessage(json.getString("id").replaceAll("/", "_")
+            .replaceAll("-", "_")
+            .replaceAll("\\.", "_"), pathParam.toString(), json);
     return message;
   }
 
@@ -90,5 +90,5 @@ public class MessageProcessorImpl implements MessageProcessService {
       this.data = data;
     }
   }
-  
+
 }
