@@ -65,8 +65,6 @@ public class MessageProcessorImpl implements MessageProcessService {
       pathParam.append("_").append(idSHA).append(defaultAttribValue);
     } else {
       String value = (String) json.getString(pathParamAttribute);
-      value = value != null ? value.replaceAll("\\s", "") : "";
-
       String pathParamSha = DigestUtils.shaHex(value);
       pathParam.append("_").append(idSHA).append("_").append(pathParamSha);
     }
