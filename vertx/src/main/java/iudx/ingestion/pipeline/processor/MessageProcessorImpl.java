@@ -65,13 +65,15 @@ public class MessageProcessorImpl implements MessageProcessService {
       pathParam.append("_").append(idSHA).append(defaultAttribValue);
     } else {
       String value = (String) json.getString(pathParamAttribute);
-      value=value!=null?value.replaceAll("\\s", ""):"";
-      pathParam.append("_").append(idSHA).append("_").append(value);
+      value = value != null ? value.replaceAll("\\s", "") : "";
+
+      String pathParamSha = DigestUtils.shaHex(value);
+      pathParam.append("_").append(idSHA).append("_").append(pathParamSha);
     }
     ProcessedMessage message =
         new ProcessedMessage(id.replaceAll("/", "_")
-                               .replaceAll("-", "_")
-                               .replaceAll("\\.", "_"), pathParam.toString(), json);
+            .replaceAll("-", "_")
+            .replaceAll("\\.", "_"), pathParam.toString(), json);
     return message;
   }
 
@@ -90,5 +92,5 @@ public class MessageProcessorImpl implements MessageProcessService {
       this.data = data;
     }
   }
-  
+
 }
