@@ -94,7 +94,6 @@ public class RedisClient {
 
   public Future<Boolean> put(String key, String path, String data) {
     Promise<Boolean> promise = Promise.promise();
-    LOGGER.debug(String.format("setting data: %s", data));
     String keyInRedis = redisKeyCache.getIfPresent(key);
     if (keyInRedis != null) {
       redis.send(JSONSET, key, path, data).onFailure(res -> {
@@ -159,5 +158,4 @@ public class RedisClient {
       LOGGER.error("Failed to get all Keys from Redis");
     });
   }
-
 }
