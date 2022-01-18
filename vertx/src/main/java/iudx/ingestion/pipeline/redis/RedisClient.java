@@ -136,9 +136,9 @@ public class RedisClient {
     LOGGER.debug("getting all keys" + redis);
     redis.keys("*", handler -> {
       if (handler.succeeded()) {
-        LOGGER.debug("handler : " + handler.toString());
         List<String> list =
-            Arrays.asList(handler.result().toString().replaceAll("\\[", "").replaceAll("\\]", "").split(","));
+            Arrays.asList(
+                handler.result().toString().replaceAll("\\[", "").replaceAll("\\]", "").split(","));
 
         promise.complete(list.stream().map(e -> e.trim()).collect(Collectors.toSet()));
       } else {
@@ -159,4 +159,5 @@ public class RedisClient {
       LOGGER.error("Failed to get all Keys from Redis");
     });
   }
+
 }
