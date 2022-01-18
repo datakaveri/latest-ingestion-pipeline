@@ -112,8 +112,8 @@ public class RabbitMQVerticle extends AbstractVerticle {
             .setAddress(RMQ_SERVICE_ADDRESS)
             .register(RabbitMQService.class, rabbitMQService);
       } else {
-        LOGGER.info("Rabbit mq client startup failed");
-        LOGGER.error(resultHandler.cause());
+        LOGGER.fatal("Rabbit mq client startup failed");
+        LOGGER.fatal(resultHandler.cause());
       }
     });
 

@@ -48,7 +48,6 @@ public class ProcessorVerticle extends AbstractVerticle {
   public void start() throws Exception {
 
     Map<String, Object> mappings = loadMappingFile();
-    LOGGER.debug("mapings file :" + mappings);
 
 
     rabbitMQService = RabbitMQService.createProxy(vertx, RMQ_SERVICE_ADDRESS);

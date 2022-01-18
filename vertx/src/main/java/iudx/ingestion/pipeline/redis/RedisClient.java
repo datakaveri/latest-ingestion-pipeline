@@ -85,7 +85,6 @@ public class RedisClient {
 
   public Future<Boolean> put(String key, String path, String data) {
     Promise<Boolean> promise = Promise.promise();
-    LOGGER.debug(String.format("setting data: %s", data));
     redis.send(JSONSET, key, path, data).onFailure(res -> {
       LOGGER.error(String.format("JSONSET did not work: %s", res.getMessage()));
       promise.fail(String.format("JSONSET did not work: %s", res.getMessage()));
@@ -104,12 +103,11 @@ public class RedisClient {
 
   public Future<List<String>> getAllKeys() {
     Promise<List<String>> promise = Promise.promise();
-    LOGGER.debug("getting all keys" + redis);
     redis.keys("*", handler -> {
       if (handler.succeeded()) {
-        LOGGER.debug("handler : " + handler.toString());
         List<String> list =
-            Arrays.asList(handler.result().toString().replaceAll("\\[", "").replaceAll("\\]", "").split(","));
+            Arrays.asList(
+                handler.result().toString().replaceAll("\\[", "").replaceAll("\\]", "").split(","));
 
         promise.complete(list.stream().map(e -> e.trim()).collect(Collectors.toList()));
       } else {
@@ -118,19 +116,5 @@ public class RedisClient {
     });
     return promise.future();
   }
-
-
-  // public Future<Boolean> put(String key, String path, Object data) {
-  // Promise<Boolean> promise = Promise.promise();
-  // LOGGER.debug(String.format("setting data: %s", data));
-  // redis.send(JSONSET, key, path, data).onFailure(res -> {
-  // LOGGER.error(String.format("JSONSET did not work: %s", res.getMessage()));
-  // LOGGER.error(String.format("JSONSET did not work: %s", res.getCause()));
-  // promise.fail(String.format("JSONSET did not work: %s", res.getCause()));
-  // }).onSuccess(redisResponse -> {
-  // promise.complete();
-  // });
-  // return promise.future();
-  // }
 
 }

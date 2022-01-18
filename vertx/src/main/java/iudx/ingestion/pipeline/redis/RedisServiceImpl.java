@@ -39,7 +39,7 @@ public class RedisServiceImpl implements RedisService {
           .append(".")
           .append(path);
 
-      LOGGER.info("path param : " + pathParam);
+      LOGGER.debug("path param : " + pathParam);
 
       JsonObject response = new JsonObject().put("result", "published");
 

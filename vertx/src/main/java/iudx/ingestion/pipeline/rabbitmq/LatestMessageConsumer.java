@@ -48,7 +48,7 @@ class LatestMessageConsumer implements IConsumer {
           if (body != null) {
             msgService.process(new JsonObject(body), handler -> {
               if (handler.succeeded()) {
-                LOGGER.info("Messaged processed and published");
+                LOGGER.debug("Messaged processed and published");
               } else {
                 LOGGER.error("Error while processing message and publishing");
               }

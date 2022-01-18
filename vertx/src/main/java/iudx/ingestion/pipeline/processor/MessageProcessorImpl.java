@@ -35,7 +35,7 @@ public class MessageProcessorImpl implements MessageProcessService {
 
   @Override
   public MessageProcessService process(JsonObject message, Handler<AsyncResult<JsonObject>> handler) {
-    LOGGER.info("message procesing starts : " + message);
+    LOGGER.trace("message procesing starts : " + message);
     if (message == null || message.isEmpty()) {
       handler.handle(Future.failedFuture("empty/null message received"));
     } else {
@@ -44,7 +44,7 @@ public class MessageProcessorImpl implements MessageProcessService {
       json.put("body", processedJson.toString());
       rabbitMQService.publish(RMQ_PROCESSED_MSG_EX, RMQ_PROCESSED_MSG_EX_ROUTING_KEY, json, publishHandler -> {
         if (publishHandler.succeeded()) {
-          LOGGER.info("published");
+          LOGGER.debug("published");
           handler.handle(Future.succeededFuture(new JsonObject().put("result", "published")));
         } else {
           LOGGER.error("published failed"+ publishHandler.cause().getMessage());
