@@ -54,7 +54,7 @@ public class ProcessedMessageConsumer implements IConsumer {
               if (handler.succeeded()) {
                 LOGGER.debug("Processed message pushed to redis");
               } else {
-                LOGGER.debug("redis push failed, " + handler.cause().getMessage());
+                LOGGER.error("redis push failed, " + handler.cause().getMessage());
               }
             });
           }

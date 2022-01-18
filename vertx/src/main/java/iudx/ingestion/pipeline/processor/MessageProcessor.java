@@ -35,7 +35,7 @@ class MessageProcessor implements IProcessor {
 
   private void processMessage(JsonObject json) {
     if (json == null || json.isEmpty()) {
-      LOGGER.info("empty/null message received");
+      LOGGER.debug("empty/null message received");
       return;
     }
     JsonObject processedJson = JsonObject.mapFrom(getProcessedMessage(json));

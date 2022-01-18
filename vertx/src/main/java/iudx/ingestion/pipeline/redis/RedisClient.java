@@ -94,7 +94,6 @@ public class RedisClient {
 
   public Future<Boolean> put(String key, String path, String data) {
     Promise<Boolean> promise = Promise.promise();
-    LOGGER.debug(String.format("setting data: %s", data));
     String keyInRedis = redisKeyCache.getIfPresent(key);
     if (keyInRedis != null) {
       redis.send(JSONSET, key, path, data).onFailure(res -> {
@@ -136,9 +135,9 @@ public class RedisClient {
     LOGGER.debug("getting all keys" + redis);
     redis.keys("*", handler -> {
       if (handler.succeeded()) {
-        LOGGER.debug("handler : " + handler.toString());
         List<String> list =
-            Arrays.asList(handler.result().toString().replaceAll("\\[", "").replaceAll("\\]", "").split(","));
+            Arrays.asList(
+                handler.result().toString().replaceAll("\\[", "").replaceAll("\\]", "").split(","));
 
         promise.complete(list.stream().map(e -> e.trim()).collect(Collectors.toSet()));
       } else {
