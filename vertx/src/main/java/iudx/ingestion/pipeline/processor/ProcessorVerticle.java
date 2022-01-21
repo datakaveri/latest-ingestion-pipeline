@@ -46,19 +46,6 @@ public class ProcessorVerticle extends AbstractVerticle {
 
   }
 
-
-//  private Map<String, Object> loadMappingFile() {
-//    try {
-//      String config = new String(Files.readAllBytes(Paths.get("secrets/attribute-mapping.json")),
-//          StandardCharsets.UTF_8);
-//      JsonObject json = new JsonObject(config);
-//      return json.getMap();
-//    } catch (IOException e) {
-//      LOGGER.error("failed to load file");
-//    }
-//    return new HashMap<String, Object>();
-//  }
-
   @Override
   public void stop() {
     binder.unregister(consumer);
