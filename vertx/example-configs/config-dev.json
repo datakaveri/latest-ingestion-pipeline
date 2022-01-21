@@ -33,6 +33,20 @@
 		{
 			"id": "iudx.ingestion.pipeline.processor.ProcessorVerticle",
 			"verticleInstances": 1
-		}
+		},
+		{
+            "id": "iudx.ingestion.pipeline.postgres.PostgresVerticle",
+            "verticleInstances": 1,
+            "databaseIp": "localhost",
+            "databasePort": 1234,
+            "databaseName": "abcd",
+            "databaseUserName": "zxwr",
+            "databasePassword": "34rds",
+            "poolSize": 25
+        },
+        {
+            "id": "iudx.ingestion.pipeline.cache.CacheVerticle",
+            "verticleInstances": 1
+        }
 	]
 }

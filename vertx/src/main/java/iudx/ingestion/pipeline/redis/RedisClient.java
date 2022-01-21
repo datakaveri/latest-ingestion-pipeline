@@ -3,15 +3,11 @@ package iudx.ingestion.pipeline.redis;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Set;
-import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
-
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-
 import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
-
 import io.vertx.core.Future;
 import io.vertx.core.Promise;
 import io.vertx.core.Vertx;
@@ -21,7 +17,7 @@ import io.vertx.redis.client.Redis;
 import io.vertx.redis.client.RedisAPI;
 import io.vertx.redis.client.RedisClientType;
 import io.vertx.redis.client.RedisOptions;
-import io.vertx.redis.client.RedisSlaves;
+import io.vertx.redis.client.RedisReplicas;
 
 public class RedisClient {
 
@@ -29,8 +25,10 @@ public class RedisClient {
   private RedisAPI redis;
   private final Vertx vertx;
   private final JsonObject config;
-  private static final Command JSONGET = Command.create("JSON.GET", -1, 1, 1, 1, true, false);
-  private static final Command JSONSET = Command.create("JSON.SET", -1, 1, 1, 1, false, false);
+  private static final Command JSONGET =
+      Command.create("JSON.GET", -1, 1, 1, 1, false, true, false, false);
+  private static final Command JSONSET =
+      Command.create("JSON.SET", -1, 1, 1, 1, true, false, false, false);
 
   private static final Logger LOGGER = LogManager.getLogger(RedisClient.class);
 
@@ -53,7 +51,8 @@ public class RedisClient {
         .append(":").append(config.getInteger("redisPort").toString());
     String mode = config.getString("redisMode");
     if (mode.equals("CLUSTER")) {
-      options = new RedisOptions().setType(RedisClientType.CLUSTER).setUseSlave(RedisSlaves.NEVER);
+      options =
+          new RedisOptions().setType(RedisClientType.CLUSTER).setUseReplicas(RedisReplicas.SHARE);
     } else if (mode.equals("STANDALONE")) {
       options = new RedisOptions().setType(RedisClientType.STANDALONE);
     } else {
@@ -117,7 +116,8 @@ public class RedisClient {
             LOGGER.info("Message pushed to Redis.");
             promise.complete(true);
           }).onFailure(handler -> {
-            LOGGER.error("fail to push message to Redis [either key not present & fail to create key]");
+            LOGGER.error(
+                "fail to push message to Redis [either key not present & fail to create key]");
             promise.fail("fail to push message");
           });
     }
