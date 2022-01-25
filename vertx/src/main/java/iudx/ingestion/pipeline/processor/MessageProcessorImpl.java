@@ -3,62 +3,91 @@ package iudx.ingestion.pipeline.processor;
 import static iudx.ingestion.pipeline.common.Constants.DEFAULT_SUFFIX;
 import static iudx.ingestion.pipeline.common.Constants.RMQ_PROCESSED_MSG_EX;
 import static iudx.ingestion.pipeline.common.Constants.RMQ_PROCESSED_MSG_EX_ROUTING_KEY;
-
-import java.util.Map;
-
 import org.apache.commons.codec.digest.DigestUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-
-import com.fasterxml.jackson.annotation.JsonProperty;
-
+import org.codehaus.jackson.annotate.JsonProperty;
 import io.vertx.core.AsyncResult;
 import io.vertx.core.Future;
 import io.vertx.core.Handler;
+import io.vertx.core.Promise;
 import io.vertx.core.Vertx;
 import io.vertx.core.json.JsonObject;
+import iudx.ingestion.pipeline.cache.CacheService;
+import iudx.ingestion.pipeline.cache.cacheImpl.CacheType;
 import iudx.ingestion.pipeline.rabbitmq.RabbitMQService;
 
 public class MessageProcessorImpl implements MessageProcessService {
 
   private static final Logger LOGGER = LogManager.getLogger(MessageProcessorImpl.class);
   private final Vertx vertx;
-  private final Map<String, Object> mappings;
+  private final CacheService cache;
   private final String defaultAttribValue = DEFAULT_SUFFIX;
   private final RabbitMQService rabbitMQService;
 
-  public MessageProcessorImpl(Vertx vertx, Map<String, Object> mappings, RabbitMQService rabbitMQService) {
+  public MessageProcessorImpl(Vertx vertx, CacheService cache, RabbitMQService rabbitMQService) {
     this.vertx = vertx;
-    this.mappings = mappings;
+    this.cache = cache;
     this.rabbitMQService = rabbitMQService;
   }
 
   @Override
-  public MessageProcessService process(JsonObject message, Handler<AsyncResult<JsonObject>> handler) {
+  public MessageProcessService process(JsonObject message,
+      Handler<AsyncResult<JsonObject>> handler) {
     LOGGER.trace("message procesing starts : " + message);
     if (message == null || message.isEmpty()) {
       handler.handle(Future.failedFuture("empty/null message received"));
     } else {
-      JsonObject processedJson = JsonObject.mapFrom(getProcessedMessage(message));
-      JsonObject json = new JsonObject();
-      json.put("body", processedJson.toString());
-      rabbitMQService.publish(RMQ_PROCESSED_MSG_EX, RMQ_PROCESSED_MSG_EX_ROUTING_KEY, json, publishHandler -> {
-        if (publishHandler.succeeded()) {
-          LOGGER.debug("published");
-          handler.handle(Future.succeededFuture(new JsonObject().put("result", "published")));
-        } else {
-          LOGGER.error("published failed" + publishHandler.cause().getMessage());
-          handler.handle(Future.failedFuture("publish failed"));
-        }
-      });
 
+      Future<ProcessedMessage> processedMsgFuture = getMessage(message);
+
+      processedMsgFuture.onComplete(msgHandler -> {
+        JsonObject processedJson = JsonObject.mapFrom(msgHandler);
+        JsonObject json = new JsonObject();
+        json.put("body", processedJson.toString());
+        rabbitMQService.publish(RMQ_PROCESSED_MSG_EX, RMQ_PROCESSED_MSG_EX_ROUTING_KEY, json,
+            publishHandler -> {
+              if (publishHandler.succeeded()) {
+                LOGGER.debug("published");
+                handler.handle(Future.succeededFuture(new JsonObject().put("result", "published")));
+              } else {
+                LOGGER.error("published failed" + publishHandler.cause().getMessage());
+                handler.handle(Future.failedFuture("publish failed"));
+              }
+            });
+      });
     }
     return this;
   }
 
-  private ProcessedMessage getProcessedMessage(JsonObject json) {
+  private Future<ProcessedMessage> getMessage(JsonObject json) {
+    Promise<ProcessedMessage> promise = Promise.promise();
+
     StringBuilder id = new StringBuilder(json.getString("id"));
-    String pathParamAttribute = (String) mappings.get(id.toString());
+
+    JsonObject cacheJson = new JsonObject();
+    cacheJson.put("type", CacheType.UNIQUE_ATTRIBUTES);
+    cacheJson.put("key", id);
+
+    cache.get(cacheJson, cacheHandler -> {
+      if (cacheHandler.succeeded()) {
+        JsonObject uaJson = cacheHandler.result();
+        String uniqueAttrib = uaJson.getString("value");
+        ProcessedMessage message = getProcessedMessage(cacheJson, uniqueAttrib);
+        promise.complete(message);
+      } else {
+        ProcessedMessage message = getProcessedMessage(cacheJson, null);
+        promise.complete(message);
+      }
+    });
+
+    return promise.future();
+  }
+
+  private ProcessedMessage getProcessedMessage(JsonObject json, String pathParamAttribute) {
+    StringBuilder id = new StringBuilder(json.getString("id"));
+
+    // String pathParamAttribute = (String) mappings.get(id.toString());
     StringBuilder pathParam = new StringBuilder();
     if (pathParamAttribute == null || pathParamAttribute.isBlank()) {
       id.append("/").append(defaultAttribValue);

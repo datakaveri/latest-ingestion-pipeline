@@ -1,8 +1,6 @@
 package iudx.ingestion.pipeline.rabbitmq;
 
-import static iudx.ingestion.pipeline.common.Constants.MSG_PROCESS_ADDRESS;
-import static iudx.ingestion.pipeline.common.Constants.REDIS_SERVICE_ADDRESS;
-import static iudx.ingestion.pipeline.common.Constants.RMQ_SERVICE_ADDRESS;
+import static iudx.ingestion.pipeline.common.Constants.*;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -14,6 +12,7 @@ import io.vertx.ext.web.client.WebClientOptions;
 import io.vertx.rabbitmq.RabbitMQClient;
 import io.vertx.rabbitmq.RabbitMQOptions;
 import io.vertx.serviceproxy.ServiceBinder;
+import iudx.ingestion.pipeline.cache.CacheService;
 import iudx.ingestion.pipeline.common.IConsumer;
 import iudx.ingestion.pipeline.common.IProducer;
 import iudx.ingestion.pipeline.processor.MessageProcessService;
@@ -29,9 +28,11 @@ public class RabbitMQVerticle extends AbstractVerticle {
 
   private MessageProcessService messageProcessService;
   private RedisService redisService;
+  private CacheService cacheService;
 
   private IConsumer processedMsgConsumer;
   private IConsumer latestMessageConsumer;
+  private IConsumer uniqueAttributeConsumer;
 
   private RabbitMQOptions config;
   private RabbitMQClient client;
@@ -80,7 +81,6 @@ public class RabbitMQVerticle extends AbstractVerticle {
     config.setRequestedChannelMax(requestedChannelMax);
     config.setNetworkRecoveryInterval(networkRecoveryInterval);
     config.setAutomaticRecoveryEnabled(true);
-    config.setConnectionRetries(2);
 
     webConfig = new WebClientOptions();
     webConfig.setKeepAlive(true);
@@ -99,12 +99,15 @@ public class RabbitMQVerticle extends AbstractVerticle {
 
         messageProcessService = MessageProcessService.createProxy(vertx, MSG_PROCESS_ADDRESS);
         redisService = RedisService.createProxy(vertx, REDIS_SERVICE_ADDRESS);
+        cacheService=CacheService.createProxy(vertx, CACHE_SERVICE_ADDRESS);
 
         processedMsgConsumer = new ProcessedMessageConsumer(vertx, client, redisService);
         latestMessageConsumer = new LatestMessageConsumer(vertx, client, messageProcessService);
+        uniqueAttributeConsumer=new UniqueAttributeConsumer(vertx, client, cacheService);
 
         processedMsgConsumer.start();
         latestMessageConsumer.start();
+        uniqueAttributeConsumer.start();
 
         binder = new ServiceBinder(vertx);
 

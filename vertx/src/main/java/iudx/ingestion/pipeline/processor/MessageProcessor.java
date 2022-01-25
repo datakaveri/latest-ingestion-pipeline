@@ -2,15 +2,11 @@ package iudx.ingestion.pipeline.processor;
 
 import static iudx.ingestion.pipeline.common.Constants.DEFAULT_SUFFIX;
 import static iudx.ingestion.pipeline.common.Constants.EB_PUBLISH_2_REDIS;
-
 import java.util.Map;
-
 import org.apache.commons.codec.digest.DigestUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-
-import com.fasterxml.jackson.annotation.JsonProperty;
-
+import org.codehaus.jackson.annotate.JsonProperty;
 import io.vertx.core.Vertx;
 import io.vertx.core.json.JsonObject;
 

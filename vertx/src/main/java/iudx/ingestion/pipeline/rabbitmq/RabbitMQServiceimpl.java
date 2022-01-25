@@ -29,7 +29,8 @@ public class RabbitMQServiceimpl implements RabbitMQService {
   @Override
   public RabbitMQService publish(String exchange, String routingkey, JsonObject data,
       Handler<AsyncResult<JsonObject>> handler) {
-    client.basicPublish(exchange, routingkey, data,
+    Buffer buffer = Buffer.buffer(data.toString());
+    client.basicPublish(exchange, routingkey, buffer,
         publishResultHandler -> {
           if (publishResultHandler.succeeded()) {
             handler.handle(Future.succeededFuture());

@@ -25,6 +25,7 @@ import io.micrometer.core.instrument.binder.jvm.JvmMemoryMetrics;
 import io.micrometer.core.instrument.binder.jvm.JvmThreadMetrics;
 import io.micrometer.core.instrument.binder.system.ProcessorMetrics;
 import io.vertx.core.DeploymentOptions;
+import io.vertx.core.Promise;
 import io.vertx.core.Vertx;
 import io.vertx.core.VertxOptions;
 import io.vertx.core.cli.CLI;
@@ -127,7 +128,7 @@ public class Deployer {
     List<String> zookeepers = configuration.getJsonArray("zookeepers").getList();
     String clusterId = configuration.getString("clusterId");
     mgr = getClusterManager(host, zookeepers, clusterId);
-    EventBusOptions ebOptions = new EventBusOptions().setClustered(true).setHost(host);
+    EventBusOptions ebOptions = new EventBusOptions().setClusterPublicHost(host);
     VertxOptions options = new VertxOptions().setClusterManager(mgr).setEventBusOptions(ebOptions)
         .setMetricsOptions(getMetricsOptions());
 
@@ -166,15 +167,10 @@ public class Deployer {
     try {
       latch_verticles.await(5, TimeUnit.SECONDS);
       LOGGER.info("All the verticles undeployed");
-      mgr.leave(handler -> {
-        if (handler.succeeded()) {
-          LOGGER.info("vertx succesfully left cluster");
-          latch_cluster.countDown();
-
-        } else {
-          LOGGER.warn("Error while hazelcast leaving, reason:" + handler.cause());
-        }
-      });
+      Promise<Void> promise = Promise.promise();
+      // leave the cluster
+      mgr.leave(promise);
+      LOGGER.info("vertx left cluster succesfully");
     } catch (Exception e) {
       e.printStackTrace();
     }
