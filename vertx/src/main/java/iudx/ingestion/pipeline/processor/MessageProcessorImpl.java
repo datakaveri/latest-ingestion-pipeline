@@ -73,10 +73,10 @@ public class MessageProcessorImpl implements MessageProcessService {
       if (cacheHandler.succeeded()) {
         JsonObject uaJson = cacheHandler.result();
         String uniqueAttrib = uaJson.getString("value");
-        ProcessedMessage message = getProcessedMessage(cacheJson, uniqueAttrib);
+        ProcessedMessage message = getProcessedMessage(json, uniqueAttrib);
         promise.complete(message);
       } else {
-        ProcessedMessage message = getProcessedMessage(cacheJson, null);
+        ProcessedMessage message = getProcessedMessage(json, null);
         promise.complete(message);
       }
     });
@@ -97,10 +97,10 @@ public class MessageProcessorImpl implements MessageProcessService {
       id.append("/").append(value);
       pathParam.append("_").append(DigestUtils.shaHex(id.toString()));
     }
-    ProcessedMessage message =
-        new ProcessedMessage(json.getString("id").replaceAll("/", "_")
-            .replaceAll("-", "_")
-            .replaceAll("\\.", "_"), pathParam.toString(), json);
+    ProcessedMessage message = new ProcessedMessage(json.getString("id")
+        .replaceAll("/", "_")
+        .replaceAll("-", "_")
+        .replaceAll("\\.", "_"), pathParam.toString(), json);
     return message;
   }
 

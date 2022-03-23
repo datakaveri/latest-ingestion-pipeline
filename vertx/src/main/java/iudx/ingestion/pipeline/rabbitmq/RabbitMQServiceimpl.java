@@ -6,11 +6,14 @@ import org.apache.logging.log4j.Logger;
 import io.vertx.core.AsyncResult;
 import io.vertx.core.Future;
 import io.vertx.core.Handler;
+import io.vertx.core.Vertx;
 import io.vertx.core.buffer.Buffer;
 import io.vertx.core.json.JsonObject;
 import io.vertx.rabbitmq.QueueOptions;
 import io.vertx.rabbitmq.RabbitMQClient;
 import io.vertx.rabbitmq.RabbitMQConsumer;
+import io.vertx.rabbitmq.RabbitMQOptions;
+import iudx.ingestion.pipeline.common.VHosts;
 
 public class RabbitMQServiceimpl implements RabbitMQService {
 
@@ -22,8 +25,16 @@ public class RabbitMQServiceimpl implements RabbitMQService {
           .setMaxInternalQueueSize(1000)
           .setKeepMostRecent(true);
 
-  public RabbitMQServiceimpl(RabbitMQClient client) {
-    this.client = client;
+  public RabbitMQServiceimpl(Vertx vertx, RabbitMQOptions options, String vhost) {
+    this.client = RabbitMQClient.create(vertx, options);
+    client
+        .start()
+        .onSuccess(handler -> {
+          LOGGER.info("RMQ client started.");
+        }).onFailure(handler -> {
+          LOGGER.error("RMQ client startup failed");
+        });
+
   }
 
   @Override
@@ -42,23 +53,24 @@ public class RabbitMQServiceimpl implements RabbitMQService {
     return this;
   }
 
-  @Override
-  public RabbitMQService consume(String queue, Handler<AsyncResult<JsonObject>> handler) {
-    client.basicConsumer(queue, options, receivedResultHandler -> {
-      if (receivedResultHandler.succeeded()) {
-        RabbitMQConsumer mqConsumer = receivedResultHandler.result();
-        mqConsumer.handler(message -> {
-          Buffer body = message.body();
-          if (body != null) {
-            handler.handle(Future.succeededFuture(new JsonObject(body)));
-          } else {
-            handler.handle(Future.failedFuture("null/empty message"));
-          }
-        });
-      }
-    });
-
-    return this;
-  }
+//  @Override
+//  public RabbitMQService consume(String queue, String vhost,
+//      Handler<AsyncResult<JsonObject>> handler) {
+//    client.basicConsumer(queue, options, receivedResultHandler -> {
+//      if (receivedResultHandler.succeeded()) {
+//        RabbitMQConsumer mqConsumer = receivedResultHandler.result();
+//        mqConsumer.handler(message -> {
+//          Buffer body = message.body();
+//          if (body != null) {
+//            handler.handle(Future.succeededFuture(new JsonObject(body)));
+//          } else {
+//            handler.handle(Future.failedFuture("null/empty message"));
+//          }
+//        });
+//      }
+//    });
+//
+//    return this;
+//  }
 
 }

@@ -1,10 +1,11 @@
 package iudx.ingestion.pipeline.rabbitmq;
 
-import static iudx.ingestion.pipeline.common.Constants.*;
-
+import static iudx.ingestion.pipeline.common.Constants.CACHE_SERVICE_ADDRESS;
+import static iudx.ingestion.pipeline.common.Constants.MSG_PROCESS_ADDRESS;
+import static iudx.ingestion.pipeline.common.Constants.REDIS_SERVICE_ADDRESS;
+import static iudx.ingestion.pipeline.common.Constants.RMQ_SERVICE_ADDRESS;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-
 import io.vertx.core.AbstractVerticle;
 import io.vertx.core.eventbus.MessageConsumer;
 import io.vertx.core.json.JsonObject;
@@ -15,7 +16,11 @@ import io.vertx.serviceproxy.ServiceBinder;
 import iudx.ingestion.pipeline.cache.CacheService;
 import iudx.ingestion.pipeline.common.IConsumer;
 import iudx.ingestion.pipeline.common.IProducer;
+import iudx.ingestion.pipeline.common.VHosts;
 import iudx.ingestion.pipeline.processor.MessageProcessService;
+import iudx.ingestion.pipeline.rabbitmq.consumers.ProcessedMessageConsumer;
+import iudx.ingestion.pipeline.rabbitmq.consumers.UniqueAttributeConsumer;
+import iudx.ingestion.pipeline.rabbitmq.consumers.LatestMessageConsumer;
 import iudx.ingestion.pipeline.redis.RedisService;
 
 public class RabbitMQVerticle extends AbstractVerticle {
@@ -32,7 +37,7 @@ public class RabbitMQVerticle extends AbstractVerticle {
 
   private IConsumer processedMsgConsumer;
   private IConsumer latestMessageConsumer;
-  private IConsumer uniqueAttributeConsumer;
+  private IConsumer uniqueAttribConsumer;
 
   private RabbitMQOptions config;
   private RabbitMQClient client;
@@ -89,36 +94,35 @@ public class RabbitMQVerticle extends AbstractVerticle {
     webConfig.setDefaultPort(dataBrokerManagementPort);
     webConfig.setKeepAliveTimeout(86400000);
 
-    client = RabbitMQClient.create(vertx, config);
 
-    client.start(resultHandler -> {
-      if (resultHandler.succeeded()) {
-        LOGGER.info("Rabbit mq client started successfully.");
+    RabbitMQOptions internalVhostOptions = new RabbitMQOptions(config);
+    String internalCommVhost = config().getString(VHosts.IUDX_INTERNAL.value);
+    internalVhostOptions.setVirtualHost(internalCommVhost);
+    rabbitMQService = new RabbitMQServiceimpl(vertx, config, internalCommVhost);
 
-        rabbitMQService = new RabbitMQServiceimpl(client);
+    messageProcessService = MessageProcessService.createProxy(vertx, MSG_PROCESS_ADDRESS);
+    redisService = RedisService.createProxy(vertx, REDIS_SERVICE_ADDRESS);
+    cacheService = CacheService.createProxy(vertx, CACHE_SERVICE_ADDRESS);
 
-        messageProcessService = MessageProcessService.createProxy(vertx, MSG_PROCESS_ADDRESS);
-        redisService = RedisService.createProxy(vertx, REDIS_SERVICE_ADDRESS);
-        cacheService=CacheService.createProxy(vertx, CACHE_SERVICE_ADDRESS);
+    // redis-latest Q will be in PROD Vhost
+    RabbitMQOptions prodOptions = new RabbitMQOptions(config);
+    String prodVhost = config().getString(VHosts.IUDX_PROD.value);
+    prodOptions.setVirtualHost(prodVhost);
+    latestMessageConsumer = new LatestMessageConsumer(vertx, prodOptions, messageProcessService);
 
-        processedMsgConsumer = new ProcessedMessageConsumer(vertx, client, redisService);
-        latestMessageConsumer = new LatestMessageConsumer(vertx, client, messageProcessService);
-        uniqueAttributeConsumer=new UniqueAttributeConsumer(vertx, client, cacheService);
 
-        processedMsgConsumer.start();
-        latestMessageConsumer.start();
-        uniqueAttributeConsumer.start();
+    processedMsgConsumer = new ProcessedMessageConsumer(vertx, internalVhostOptions, redisService);
+    uniqueAttribConsumer = new UniqueAttributeConsumer(vertx, internalVhostOptions, cacheService);
 
-        binder = new ServiceBinder(vertx);
+    processedMsgConsumer.start();
+    latestMessageConsumer.start();
+    uniqueAttribConsumer.start();
 
-        consumer = binder
-            .setAddress(RMQ_SERVICE_ADDRESS)
-            .register(RabbitMQService.class, rabbitMQService);
-      } else {
-        LOGGER.fatal("Rabbit mq client startup failed");
-        LOGGER.fatal(resultHandler.cause());
-      }
-    });
+    binder = new ServiceBinder(vertx);
+
+    consumer = binder
+        .setAddress(RMQ_SERVICE_ADDRESS)
+        .register(RabbitMQService.class, rabbitMQService);
 
 
 
