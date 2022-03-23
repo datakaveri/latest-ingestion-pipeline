@@ -32,7 +32,7 @@ public class RedisServiceImpl implements RedisService {
 
   @Override
   public RedisService put(String key, String path, String data, Handler<AsyncResult<JsonObject>> handler) {
-
+    LOGGER.info("from prodesssed message Q : "+key);
     if (data != null) {
       StringBuilder pathParam = new StringBuilder();
       pathParam

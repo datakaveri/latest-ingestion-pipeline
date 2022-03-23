@@ -98,7 +98,7 @@ public class RabbitMQVerticle extends AbstractVerticle {
     RabbitMQOptions internalVhostOptions = new RabbitMQOptions(config);
     String internalCommVhost = config().getString(VHosts.IUDX_INTERNAL.value);
     internalVhostOptions.setVirtualHost(internalCommVhost);
-    rabbitMQService = new RabbitMQServiceimpl(vertx, config, internalCommVhost);
+    rabbitMQService = new RabbitMQServiceimpl(vertx, internalVhostOptions);
 
     messageProcessService = MessageProcessService.createProxy(vertx, MSG_PROCESS_ADDRESS);
     redisService = RedisService.createProxy(vertx, REDIS_SERVICE_ADDRESS);

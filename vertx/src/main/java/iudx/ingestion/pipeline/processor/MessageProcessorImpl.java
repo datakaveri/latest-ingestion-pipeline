@@ -41,11 +41,9 @@ public class MessageProcessorImpl implements MessageProcessService {
 
       Future<ProcessedMessage> processedMsgFuture = getMessage(message);
 
-      processedMsgFuture.onComplete(msgHandler -> {
+      processedMsgFuture.onSuccess(msgHandler -> {
         JsonObject processedJson = JsonObject.mapFrom(msgHandler);
-        JsonObject json = new JsonObject();
-        json.put("body", processedJson.toString());
-        rabbitMQService.publish(RMQ_PROCESSED_MSG_EX, RMQ_PROCESSED_MSG_EX_ROUTING_KEY, json,
+        rabbitMQService.publish(RMQ_PROCESSED_MSG_EX, RMQ_PROCESSED_MSG_EX_ROUTING_KEY, processedJson,
             publishHandler -> {
               if (publishHandler.succeeded()) {
                 LOGGER.debug("published");
@@ -101,6 +99,9 @@ public class MessageProcessorImpl implements MessageProcessService {
         .replaceAll("/", "_")
         .replaceAll("-", "_")
         .replaceAll("\\.", "_"), pathParam.toString(), json);
+
+    LOGGER.debug("message after ua: " + message.toString());
+
     return message;
   }
 
@@ -117,6 +118,23 @@ public class MessageProcessorImpl implements MessageProcessService {
       this.key = key;
       this.pathParam = pathParam;
       this.data = data;
+    }
+
+    public String getKey() {
+      return key;
+    }
+
+    public String getPathParam() {
+      return pathParam;
+    }
+
+    public JsonObject getData() {
+      return data;
+    }
+
+    @Override
+    public String toString() {
+      return "Key : " + this.key + " pathParam : " + pathParam + " data : " + data;
     }
   }
 

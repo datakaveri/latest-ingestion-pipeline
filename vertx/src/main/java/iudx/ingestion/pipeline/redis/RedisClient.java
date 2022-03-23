@@ -1,5 +1,7 @@
 package iudx.ingestion.pipeline.redis;
 
+import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Set;
@@ -46,9 +48,16 @@ public class RedisClient {
     Promise<RedisClient> promise = Promise.promise();
     StringBuilder RedisURI = new StringBuilder();
     RedisOptions options = null;
-    RedisURI.append("redis://").append(config.getString("redisUsername")).append(":")
-        .append(config.getString("redisPassword")).append("@").append(config.getString("redisHost"))
-        .append(":").append(config.getInteger("redisPort").toString());
+
+    RedisURI
+        .append("redis://")
+        .append(URLEncoder.encode(config.getString("redisUsername"),StandardCharsets.UTF_8))
+        .append(":")
+        .append(URLEncoder.encode(config.getString("redisPassword"), StandardCharsets.UTF_8))
+        .append("@")
+        .append(config.getString("redisHost"))
+        .append(":")
+        .append(config.getInteger("redisPort").toString());
     String mode = config.getString("redisMode");
     if (mode.equals("CLUSTER")) {
       options =
@@ -64,9 +73,14 @@ public class RedisClient {
 
     ClusteredClient = Redis.createClient(vertx, options);
     ClusteredClient.connect(conn -> {
-      redis = RedisAPI.api(conn.result());
-      this.initKeysCache();
-      promise.complete(this);
+      if (conn.succeeded()) {
+        redis = RedisAPI.api(conn.result());
+        this.initKeysCache();
+        promise.complete(this);
+      } else {
+        LOGGER.fatal("fail to connect to redis server :" + conn);
+        promise.fail(conn.cause());
+      }
     });
     return promise.future();
   }
@@ -132,16 +146,14 @@ public class RedisClient {
 
   public Future<Set<String>> getAllKeys() {
     Promise<Set<String>> promise = Promise.promise();
-    LOGGER.debug("getting all keys" + redis);
     redis.keys("*", handler -> {
       if (handler.succeeded()) {
         List<String> list =
             Arrays.asList(
                 handler.result().toString().replaceAll("\\[", "").replaceAll("\\]", "").split(","));
-
         promise.complete(list.stream().map(e -> e.trim()).collect(Collectors.toSet()));
       } else {
-        LOGGER.error("faile to get Keys from Redis");
+        LOGGER.error("failed to get Keys from Redis");
         promise.fail("failed to get keys " + handler.cause());
       }
     });
@@ -149,13 +161,14 @@ public class RedisClient {
   }
 
   private void initKeysCache() {
-    getAllKeys().onSuccess(handler -> {
-      Set<String> keys = handler;
-      keys.forEach(key -> {
-        redisKeyCache.put(key, "TRUE");
-      });
-    }).onFailure(handler -> {
-      LOGGER.error("Failed to get all Keys from Redis");
-    });
+    getAllKeys()
+        .onSuccess(handler -> {
+          Set<String> keys = handler;
+          keys.forEach(key -> {
+            redisKeyCache.put(key, "TRUE");
+          });
+        }).onFailure(handler -> {
+          LOGGER.error("Failed to get all Keys from Redis");
+        });
   }
 }

@@ -25,9 +25,9 @@ public class RabbitMQServiceimpl implements RabbitMQService {
           .setMaxInternalQueueSize(1000)
           .setKeepMostRecent(true);
 
-  public RabbitMQServiceimpl(Vertx vertx, RabbitMQOptions options, String vhost) {
+  public RabbitMQServiceimpl(Vertx vertx, RabbitMQOptions options) {
     this.client = RabbitMQClient.create(vertx, options);
-    client
+    this.client
         .start()
         .onSuccess(handler -> {
           LOGGER.info("RMQ client started.");
@@ -46,31 +46,30 @@ public class RabbitMQServiceimpl implements RabbitMQService {
           if (publishResultHandler.succeeded()) {
             handler.handle(Future.succeededFuture());
           } else {
-            LOGGER.error("published failed");
+            LOGGER.error("published failed" + publishResultHandler);
             handler.handle(Future.failedFuture("publish failed"));
           }
         });
     return this;
   }
 
-//  @Override
-//  public RabbitMQService consume(String queue, String vhost,
-//      Handler<AsyncResult<JsonObject>> handler) {
-//    client.basicConsumer(queue, options, receivedResultHandler -> {
-//      if (receivedResultHandler.succeeded()) {
-//        RabbitMQConsumer mqConsumer = receivedResultHandler.result();
-//        mqConsumer.handler(message -> {
-//          Buffer body = message.body();
-//          if (body != null) {
-//            handler.handle(Future.succeededFuture(new JsonObject(body)));
-//          } else {
-//            handler.handle(Future.failedFuture("null/empty message"));
-//          }
-//        });
-//      }
-//    });
-//
-//    return this;
-//  }
+  @Override
+  public RabbitMQService consume(String queue, Handler<AsyncResult<JsonObject>> handler) {
+    client.basicConsumer(queue, options, receivedResultHandler -> {
+      if (receivedResultHandler.succeeded()) {
+        RabbitMQConsumer mqConsumer = receivedResultHandler.result();
+        mqConsumer.handler(message -> {
+          Buffer body = message.body();
+          if (body != null) {
+            handler.handle(Future.succeededFuture(new JsonObject(body)));
+          } else {
+            handler.handle(Future.failedFuture("null/empty message"));
+          }
+        });
+      }
+    });
+
+    return this;
+  }
 
 }
