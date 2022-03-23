@@ -34,7 +34,7 @@ public class MessageProcessorImpl implements MessageProcessService {
   @Override
   public MessageProcessService process(JsonObject message,
       Handler<AsyncResult<JsonObject>> handler) {
-    LOGGER.trace("message procesing starts : " + message);
+    LOGGER.info("message procesing starts : ");
     if (message == null || message.isEmpty()) {
       handler.handle(Future.failedFuture("empty/null message received"));
     } else {
@@ -43,7 +43,9 @@ public class MessageProcessorImpl implements MessageProcessService {
 
       processedMsgFuture.onSuccess(msgHandler -> {
         JsonObject processedJson = JsonObject.mapFrom(msgHandler);
-        rabbitMQService.publish(RMQ_PROCESSED_MSG_EX, RMQ_PROCESSED_MSG_EX_ROUTING_KEY, processedJson,
+        LOGGER.debug("message publishing to processed Q : ");
+        rabbitMQService.publish(RMQ_PROCESSED_MSG_EX, RMQ_PROCESSED_MSG_EX_ROUTING_KEY,
+            processedJson,
             publishHandler -> {
               if (publishHandler.succeeded()) {
                 LOGGER.debug("published");
@@ -85,7 +87,6 @@ public class MessageProcessorImpl implements MessageProcessService {
   private ProcessedMessage getProcessedMessage(JsonObject json, String pathParamAttribute) {
     StringBuilder id = new StringBuilder(json.getString("id"));
 
-    // String pathParamAttribute = (String) mappings.get(id.toString());
     StringBuilder pathParam = new StringBuilder();
     if (pathParamAttribute == null || pathParamAttribute.isBlank()) {
       id.append("/").append(defaultAttribValue);
@@ -99,8 +100,6 @@ public class MessageProcessorImpl implements MessageProcessService {
         .replaceAll("/", "_")
         .replaceAll("-", "_")
         .replaceAll("\\.", "_"), pathParam.toString(), json);
-
-    LOGGER.debug("message after ua: " + message.toString());
 
     return message;
   }

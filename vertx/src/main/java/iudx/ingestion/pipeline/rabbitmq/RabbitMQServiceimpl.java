@@ -32,7 +32,7 @@ public class RabbitMQServiceimpl implements RabbitMQService {
         .onSuccess(handler -> {
           LOGGER.info("RMQ client started.");
         }).onFailure(handler -> {
-          LOGGER.error("RMQ client startup failed");
+          LOGGER.fatal("RMQ client startup failed");
         });
 
   }

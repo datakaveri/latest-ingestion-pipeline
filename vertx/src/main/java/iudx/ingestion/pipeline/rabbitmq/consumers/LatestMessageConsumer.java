@@ -45,10 +45,12 @@ public class LatestMessageConsumer implements IConsumer {
           client
               .basicConsumer(RMQ_LATEST_DATA_Q, options)
               .onSuccess(receiveResultHandler -> {
+                
                 RabbitMQConsumer mqConsumer = receiveResultHandler;
                 mqConsumer.handler(message -> {
                   Buffer body = message.body();
                   if (body != null) {
+                    LOGGER.info("latest message received");
                     msgService.process(new JsonObject(body), handler -> {
                       if (handler.succeeded()) {
                         LOGGER.debug("Messaged processed and published");

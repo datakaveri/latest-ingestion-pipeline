@@ -50,11 +50,10 @@ public class ProcessedMessageConsumer implements IConsumer {
                   Buffer body = message.body();
                   if (body != null) {
                     JsonObject fromRMQ = new JsonObject(body);
-                    LOGGER.info("from RMQ : "+fromRMQ);
                     String key = fromRMQ.getString("key");
                     String path = fromRMQ.getString("pathParam");
                     String data = fromRMQ.getJsonObject("data").toString();
-                    LOGGER.debug("message key :"+key+ " path : "+path+" data : "+data);
+                    LOGGER.info("processed message received");
                     redisService.put(key, path, data, handler -> {
                       if (handler.succeeded()) {
                         LOGGER.debug("Processed message pushed to redis");

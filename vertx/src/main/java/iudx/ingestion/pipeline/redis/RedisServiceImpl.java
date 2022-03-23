@@ -32,7 +32,6 @@ public class RedisServiceImpl implements RedisService {
 
   @Override
   public RedisService put(String key, String path, String data, Handler<AsyncResult<JsonObject>> handler) {
-    LOGGER.info("from prodesssed message Q : "+key);
     if (data != null) {
       StringBuilder pathParam = new StringBuilder();
       pathParam
@@ -42,7 +41,7 @@ public class RedisServiceImpl implements RedisService {
       LOGGER.debug("path param : " + pathParam);
 
       JsonObject response = new JsonObject().put("result", "published");
-
+      LOGGER.debug("pushing to redis");
       redisClient.put(key, pathParam.toString(), data).onComplete(res -> {
         if (res.failed()) {
           LOGGER.error(res.cause());
