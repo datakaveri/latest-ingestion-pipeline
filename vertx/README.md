@@ -1,6 +1,6 @@
 # iudx-latest-ingestion-pipeline
 
-The IUDX latest ingestion pipeline server used for saving and querying the latest values of any resource item or resource group
+The new latest ingestion pipeline is designed to ingest data asynchronously into Redis Database. This pipeline would enable the IUDX Resource Server to serve latest data for IUDX specified resources that are available in the Database.
 
 ## Prerequisites
 
