@@ -1,8 +1,6 @@
 # iudx-latest-ingestion-pipeline
 
 
-## Get Started
-
 ## Prerequisites
 
 ### External dependencies installation

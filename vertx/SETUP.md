@@ -22,16 +22,16 @@ In order to connect to the appropriate Postgres database, required information s
 
 
 **PostgresVerticle**
-```json
+```
 {
     "id": "iudx.ingestion.pipeline.postgres.PostgresVerticle",
-    "verticleInstances": <num-of-verticle-instances>,
-    "databaseIp": <database-ip>,
-    "databasePort": <port-number>,
-    "databaseName": <database-name>,
-    "databaseUserName": <username-for-psql>,
-    "databasePassword": <password-for-psql>,
-    "poolSize": <pool-size>
+    "verticleInstances": "<num-of-verticle-instances>",
+    "databaseIp": "<database-ip>",
+    "databasePort": "<port-number>",
+    "databaseName": "<database-name>",
+    "databaseUserName": "<username-for-psql>",
+    "databasePassword": "<password-for-psql>",
+    "poolSize": "<pool-size>"
 }
 ```
 
@@ -90,9 +90,9 @@ CREATE TRIGGER update_ua_modified BEFORE INSERT OR UPDATE ON unique_attributes F
 In order to connect to the appropriate RabbitMQ instance, required information such as dataBrokerIP,dataBrokerPort etc. should be updated in the DataBrokerVerticle module available in [config-example.json](configs/config-example.json).
 
  **RabbitMQ Verticle**
-```json
+```
 {
-    id": "iudx.ingestion.pipeline.rabbitmq.RabbitMQVerticle",
+    "id": "iudx.ingestion.pipeline.rabbitmq.RabbitMQVerticle",
     "verticleInstances": <num-of-verticle-instances>,
     "dataBrokerIP": <rabbit mq ip>,
     "dataBrokerPort": <port-number>,
