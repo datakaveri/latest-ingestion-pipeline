@@ -18,7 +18,6 @@ Find the installations of the above along with the configurations to modify the 
    git clone https://github.com/datakaveri/latest-ingestion-pipeline.git && cd latest-ingestion-pipeline/vertx/
    ```
 2. Make a config file based on the template in `example-configs/config-dev.json` for non-clustered vertx and  `example-configs/config-depl.json` for clustered vertx.
-   - Make `attribute-mapping.json` based on the template in `example-configs/attribute-mapping.json`
    - Modify the databroker url and associated credentials in the appropriate sections
    - Populate secrets directory with following structure in the present directory:
       ```sh
@@ -27,7 +26,6 @@ Find the installations of the above along with the configurations to modify the 
       │   ├── config-depl.json (needed for clustered vertx all verticles  in one container)
       │   ├── config-dev.json (needed for non-clustered vertx all verticles in one container/maven based setup)
       │  
-      ├──  attribute-mapping.json
       └── one-verticle-configs/ (directory, needed for clustered vertx in multi-container)
       ``` 
 3. Populate `.lip.env` environment file based on template in `example-configs/example-evironment-file(.lip.env)` in the present directory
