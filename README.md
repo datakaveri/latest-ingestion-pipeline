@@ -56,7 +56,7 @@ The implementation consists of 3 main components-
 2. Redis Client written in Java using Vertx <insert link> and JReJSON <insert link>
 3. Redis
 
-A detailed explanation of the implementation can be found [here]("./vertx/README.md").
+A detailed explanation of the implementation can be found [here](vertx/README.md).
 
 ## Reactive Pattern using aio_pika 
 
