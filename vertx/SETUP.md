@@ -18,7 +18,7 @@ Latest Ingestion Pipeline server connects with various external dependencies nam
 
 **Note** : PostgresQL database should be configured with a RBAC user having CRUD privileges
 
-In order to connect to the appropriate Postgres database, required information such as databaseIP,databasePort etc. should be updated in the PostgresVerticle and DataBrokerVerticle modules available in [config-example.json](configs/config-example.json).
+In order to connect to the appropriate Postgres database, required information such as databaseIP,databasePort etc. should be updated in the PostgresVerticle and DataBrokerVerticle modules available in [config-example.json](example-configs/config-example.json).
 
 
 **PostgresVerticle**
@@ -87,7 +87,7 @@ CREATE TRIGGER update_ua_modified BEFORE INSERT OR UPDATE ON unique_attributes F
 - Refer to the docker files available [here](https://github.com/datakaveri/iudx-deployment/blob/master/Docker-Swarm-deployment/single-node/databroker) to setup RMQ.
 
 
-In order to connect to the appropriate RabbitMQ instance, required information such as dataBrokerIP,dataBrokerPort etc. should be updated in the DataBrokerVerticle module available in [config-example.json](configs/config-example.json).
+In order to connect to the appropriate RabbitMQ instance, required information such as dataBrokerIP,dataBrokerPort etc. should be updated in the DataBrokerVerticle module available in [config-example.json](example-configs/config-example.json).
 
  **RabbitMQ Verticle**
 ```
@@ -120,3 +120,25 @@ In addition to above configs, Latest ingestion pipeline server also expects few 
 - lip-unique-attributes
 
 an appropriate binding should also be done between exchanges and queues.
+
+
+## Setting up Redis
+- Refer to the docker files available [here](https://github.com/datakaveri/iudx-deployment/blob/master/Docker-Swarm-deployment/single-node/redis)
+
+In order to connect to the appropriate Redis instance, required information such as redisHost,redisPort etc. should be updated in the LatestVerticle module available in [config-example.json](example-configs/config-example.json).
+
+**RedisVerticle**
+```
+{
+   "id": "iudx.resource.server.database.latest.LatestVerticle",
+    "verticleInstances": <num-of-verticle-instances>,
+    "redisMode": <mode>,
+    "redisUsername": <username-for-redis>,
+    "redisPassword": <password-for-redis>,
+    "redisMaxPoolSize": <pool-size>,
+    "redisMaxPoolWaiting": <max-pool-waiting>,
+    "redisMaxWaitingHandlers": <max-waiting-handlers>,
+    "redisPoolRecycleTimeout": <recycle-timeout-in milliseconds>,
+    "redisHost": "localhost",
+    "redisPort": <port-number>,
+}
