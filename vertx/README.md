@@ -3,7 +3,18 @@
 
 ## Get Started
 
-### Prerequisite - Make configuration
+## Prerequisites
+
+### External dependencies installation
+
+The Latest ingestion pipeline connects to various external dependencies namely
+ - Postgres SQL
+ - RabbitMQ
+ - Redis
+
+Find the installations of the above along with the configurations to modify the database url, port and associated credentials in the appropriate sections [here](SETUP.md)
+
+### Make configuration
 1. Clone this repo and change directory:
    ```sh 
    git clone https://github.com/datakaveri/latest-ingestion-pipeline.git && cd latest-ingestion-pipeline/vertx/
