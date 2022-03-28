@@ -34,18 +34,18 @@ public class MessageProcessorImpl implements MessageProcessService {
   @Override
   public MessageProcessService process(JsonObject message,
       Handler<AsyncResult<JsonObject>> handler) {
-    LOGGER.trace("message procesing starts : " + message);
+    LOGGER.info("message procesing starts : ");
     if (message == null || message.isEmpty()) {
       handler.handle(Future.failedFuture("empty/null message received"));
     } else {
 
       Future<ProcessedMessage> processedMsgFuture = getMessage(message);
 
-      processedMsgFuture.onComplete(msgHandler -> {
+      processedMsgFuture.onSuccess(msgHandler -> {
         JsonObject processedJson = JsonObject.mapFrom(msgHandler);
-        JsonObject json = new JsonObject();
-        json.put("body", processedJson.toString());
-        rabbitMQService.publish(RMQ_PROCESSED_MSG_EX, RMQ_PROCESSED_MSG_EX_ROUTING_KEY, json,
+        LOGGER.debug("message publishing to processed Q : ");
+        rabbitMQService.publish(RMQ_PROCESSED_MSG_EX, RMQ_PROCESSED_MSG_EX_ROUTING_KEY,
+            processedJson,
             publishHandler -> {
               if (publishHandler.succeeded()) {
                 LOGGER.debug("published");
@@ -73,10 +73,10 @@ public class MessageProcessorImpl implements MessageProcessService {
       if (cacheHandler.succeeded()) {
         JsonObject uaJson = cacheHandler.result();
         String uniqueAttrib = uaJson.getString("value");
-        ProcessedMessage message = getProcessedMessage(cacheJson, uniqueAttrib);
+        ProcessedMessage message = getProcessedMessage(json, uniqueAttrib);
         promise.complete(message);
       } else {
-        ProcessedMessage message = getProcessedMessage(cacheJson, null);
+        ProcessedMessage message = getProcessedMessage(json, null);
         promise.complete(message);
       }
     });
@@ -87,7 +87,6 @@ public class MessageProcessorImpl implements MessageProcessService {
   private ProcessedMessage getProcessedMessage(JsonObject json, String pathParamAttribute) {
     StringBuilder id = new StringBuilder(json.getString("id"));
 
-    // String pathParamAttribute = (String) mappings.get(id.toString());
     StringBuilder pathParam = new StringBuilder();
     if (pathParamAttribute == null || pathParamAttribute.isBlank()) {
       id.append("/").append(defaultAttribValue);
@@ -97,10 +96,11 @@ public class MessageProcessorImpl implements MessageProcessService {
       id.append("/").append(value);
       pathParam.append("_").append(DigestUtils.shaHex(id.toString()));
     }
-    ProcessedMessage message =
-        new ProcessedMessage(json.getString("id").replaceAll("/", "_")
-            .replaceAll("-", "_")
-            .replaceAll("\\.", "_"), pathParam.toString(), json);
+    ProcessedMessage message = new ProcessedMessage(json.getString("id")
+        .replaceAll("/", "_")
+        .replaceAll("-", "_")
+        .replaceAll("\\.", "_"), pathParam.toString(), json);
+
     return message;
   }
 
@@ -117,6 +117,23 @@ public class MessageProcessorImpl implements MessageProcessService {
       this.key = key;
       this.pathParam = pathParam;
       this.data = data;
+    }
+
+    public String getKey() {
+      return key;
+    }
+
+    public String getPathParam() {
+      return pathParam;
+    }
+
+    public JsonObject getData() {
+      return data;
+    }
+
+    @Override
+    public String toString() {
+      return "Key : " + this.key + " pathParam : " + pathParam + " data : " + data;
     }
   }
 

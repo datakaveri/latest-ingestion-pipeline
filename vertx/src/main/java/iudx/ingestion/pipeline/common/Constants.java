@@ -10,12 +10,13 @@ public class Constants {
 
   // RMQ
   public final static String RMQ_LATEST_DATA_Q = "redis-latest";
-  public final static String RMQ_PROCESSED_DATA_Q = "vertx-rmq-redis-reader";
 
-  public final static String RMQ_PROCESSED_MSG_EX = "vertx-rmq-redis-writer";
+
+  public final static String RMQ_PROCESSED_MSG_EX = "processed-messages";
+  public final static String RMQ_PROCESSED_MSG_Q = "lip-processed-messages";
   public final static String RMQ_PROCESSED_MSG_EX_ROUTING_KEY = "processed";
-  
-  public final static String UNIQUE_ATTR_Q = "unique-attribute";
+
+  public final static String UNIQUE_ATTR_Q = "lip-unique-attributes";
 
   // EventBus
   public final static String EB_RECEIVED_MSG_ADDRESS = "received.message";
@@ -25,9 +26,9 @@ public class Constants {
 
   //
   public final static String DEFAULT_SUFFIX = "_d";
-  
-  
-  //pg queries
+
+
+  // pg queries
   public final static String SELECT_UNIQUE_ATTRIBUTE = "SELECT * from unique_attributes";
 
 }

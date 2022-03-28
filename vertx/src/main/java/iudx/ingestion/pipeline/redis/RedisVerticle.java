@@ -23,7 +23,8 @@ public class RedisVerticle extends AbstractVerticle {
 
   @Override
   public void start() throws Exception {
-    new RedisClient(vertx, config()).start()
+    new RedisClient(vertx, config())
+        .start()
         .onSuccess(handler -> {
           client = handler;
           redisService = new RedisServiceImpl(client);

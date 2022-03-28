@@ -6,11 +6,14 @@ import org.apache.logging.log4j.Logger;
 import io.vertx.core.AsyncResult;
 import io.vertx.core.Future;
 import io.vertx.core.Handler;
+import io.vertx.core.Vertx;
 import io.vertx.core.buffer.Buffer;
 import io.vertx.core.json.JsonObject;
 import io.vertx.rabbitmq.QueueOptions;
 import io.vertx.rabbitmq.RabbitMQClient;
 import io.vertx.rabbitmq.RabbitMQConsumer;
+import io.vertx.rabbitmq.RabbitMQOptions;
+import iudx.ingestion.pipeline.common.VHosts;
 
 public class RabbitMQServiceimpl implements RabbitMQService {
 
@@ -22,8 +25,16 @@ public class RabbitMQServiceimpl implements RabbitMQService {
           .setMaxInternalQueueSize(1000)
           .setKeepMostRecent(true);
 
-  public RabbitMQServiceimpl(RabbitMQClient client) {
-    this.client = client;
+  public RabbitMQServiceimpl(Vertx vertx, RabbitMQOptions options) {
+    this.client = RabbitMQClient.create(vertx, options);
+    this.client
+        .start()
+        .onSuccess(handler -> {
+          LOGGER.info("RMQ client started.");
+        }).onFailure(handler -> {
+          LOGGER.fatal("RMQ client startup failed");
+        });
+
   }
 
   @Override
@@ -35,7 +46,7 @@ public class RabbitMQServiceimpl implements RabbitMQService {
           if (publishResultHandler.succeeded()) {
             handler.handle(Future.succeededFuture());
           } else {
-            LOGGER.error("published failed");
+            LOGGER.error("published failed" + publishResultHandler);
             handler.handle(Future.failedFuture("publish failed"));
           }
         });
