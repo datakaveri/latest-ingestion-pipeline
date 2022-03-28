@@ -16,7 +16,7 @@ Latest Ingestion Pipeline server connects with various external dependencies nam
 ## Setting up PostgreSQL 
 -  Refer to the docker files available [here](https://github.com/datakaveri/iudx-deployment/blob/master/Docker-Swarm-deployment/single-node/postgres) to setup PostgreSQL
 
-**Note** : PostgresQL database should be configured with a RBAC user having CRUD privileges
+> PostgresQL database should be configured with a RBAC user having CRUD privileges
 
 In order to connect to the appropriate Postgres database, required information such as databaseIP,databasePort etc. should be updated in the PostgresVerticle and DataBrokerVerticle modules available in [config-example.json](example-configs/config-example.json).
 
@@ -37,7 +37,7 @@ In order to connect to the appropriate Postgres database, required information s
 
 #### Schemas for PostgreSQL tables used by Latest ingestion pipeline
 
-**Note** : Every postgreSQL table also uses function & triggers to insert/update values in `created_at` and `modified_at` columns.
+> Every postgreSQL table also uses function & triggers to insert/update values in `created_at` and `modified_at` columns.
 1. Creating `update_modified` function
 ```sql
 CREATE
