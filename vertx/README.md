@@ -2,7 +2,7 @@
 
 The IUDX latest ingestion pipeline server used for saving and querying the latest values of any resource item or resource group
 
-##Get started
+## Get started
 
 ### Prerequisites
 
