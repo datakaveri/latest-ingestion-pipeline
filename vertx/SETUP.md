@@ -11,7 +11,7 @@ Latest Ingestion Pipeline server connects with various external dependencies nam
 
  - `PostgreSQL` : used to store the query related to token invalidations, unique attributes etc.
  - `RabbitMQ` : used to publish and subscribe different types of messages or events.
- - `Redis` : used to store the latest/currentl value of every resource Item or resource group.
+ - `Redis` : used to store the latest/current value of every resource Item or resource group.
 
 ## Setting up PostgreSQL 
 -  Refer to the docker files available [here](https://github.com/datakaveri/iudx-deployment/blob/master/Docker-Swarm-deployment/single-node/postgres) to setup PostgreSQL
