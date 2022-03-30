@@ -6,6 +6,10 @@ Setup Guide
 This document contains the installation and configuration processes of the external modules of each Verticle in IUDX Latest Ingestion Pipeline Server.
 
 
+<p align="center">
+<img src="docs/lip_server_overview.png">
+</p>
+
 
 Latest Ingestion Pipeline server connects with various external dependencies namely :
 
