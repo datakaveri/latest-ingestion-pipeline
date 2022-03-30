@@ -2,6 +2,11 @@
 
 The latest ingestion pipeline is designed to ingest data asynchronously into Redis Database. This pipeline would enable the IUDX Resource Server to serve latest data for IUDX specified resources that are available in the Database.
 
+<p align="center">
+<img src="docs/lip_server_overview.png">
+</p>
+
+
 ## Prerequisites
 
 ### External dependencies installation
