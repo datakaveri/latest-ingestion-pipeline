@@ -134,7 +134,7 @@ In order to connect to the appropriate Redis instance, required information such
 **RedisVerticle**
 ```
 {
-   "id": "iudx.resource.server.database.latest.LatestVerticle",
+   "id": "iudx.ingestion.pipeline.redis.RedisVerticle",
     "verticleInstances": <num-of-verticle-instances>,
     "redisMode": <mode>,
     "redisUsername": <username-for-redis>,
