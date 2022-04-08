@@ -18,9 +18,9 @@ import iudx.ingestion.pipeline.common.IConsumer;
 import iudx.ingestion.pipeline.common.IProducer;
 import iudx.ingestion.pipeline.common.VHosts;
 import iudx.ingestion.pipeline.processor.MessageProcessService;
+import iudx.ingestion.pipeline.rabbitmq.consumers.LatestMessageConsumer;
 import iudx.ingestion.pipeline.rabbitmq.consumers.ProcessedMessageConsumer;
 import iudx.ingestion.pipeline.rabbitmq.consumers.UniqueAttributeConsumer;
-import iudx.ingestion.pipeline.rabbitmq.consumers.LatestMessageConsumer;
 import iudx.ingestion.pipeline.redis.RedisService;
 
 public class RabbitMQVerticle extends AbstractVerticle {
@@ -44,7 +44,6 @@ public class RabbitMQVerticle extends AbstractVerticle {
   private String dataBrokerIP;
   private int dataBrokerPort;
   private int dataBrokerManagementPort;
-  private String dataBrokerVhost;
   private String dataBrokerUserName;
   private String dataBrokerPassword;
   private int connectionTimeout;
@@ -63,7 +62,6 @@ public class RabbitMQVerticle extends AbstractVerticle {
     dataBrokerIP = config().getString("dataBrokerIP");
     dataBrokerPort = config().getInteger("dataBrokerPort");
     dataBrokerManagementPort = config().getInteger("dataBrokerManagementPort");
-    dataBrokerVhost = config().getString("dataBrokerVhost");
     dataBrokerUserName = config().getString("dataBrokerUserName");
     dataBrokerPassword = config().getString("dataBrokerPassword");
     connectionTimeout = config().getInteger("connectionTimeout");
@@ -79,7 +77,6 @@ public class RabbitMQVerticle extends AbstractVerticle {
     config.setPassword(dataBrokerPassword);
     config.setHost(dataBrokerIP);
     config.setPort(dataBrokerPort);
-    config.setVirtualHost(dataBrokerVhost);
     config.setConnectionTimeout(connectionTimeout);
     config.setRequestedHeartbeat(requestedHeartbeat);
     config.setHandshakeTimeout(handshakeTimeout);

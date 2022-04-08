@@ -10,7 +10,6 @@
 			"verticleInstances": 1,
 			"dataBrokerIP": "",
 			"dataBrokerPort": 1234,
-			"dataBrokerVhost": "",
 			"dataBrokerUserName": "",
 			"dataBrokerPassword": "",
 			"dataBrokerManagementPort": 15672,
@@ -19,7 +18,11 @@
 			"handshakeTimeout": 6000,
 			"requestedChannelMax": 5,
 			"networkRecoveryInterval": 500,
-			"automaticRecoveryEnabled": true
+			"automaticRecoveryEnabled": true,
+			 "prodVhost": "IUDX",
+                         "internalVhost": "IUDX-INTERNAL",
+                        "externalVhost": "IUDX-EXTERNAL"
+
 		},
 		{
 			"id": "iudx.ingestion.pipeline.redis.RedisVerticle",
@@ -36,7 +39,7 @@
 			"verticleInstances": 1
 		},
         {
-            "id": "iudx.file.server.database.postgres.PostgresVerticle",
+            "id": "iudx.ingestion.pipeline.postgres.PostgresVerticle",
             "verticleInstances": 1,
             "databaseIp": "localhost",
             "databasePort": 1234,
@@ -46,7 +49,7 @@
             "poolSize": 25
         },
         {
-            "id": "iudx.file.server.cache.CacheVerticle",
+            "id": "iudx.ingestion.pipeline.cache.CacheVerticle",
             "verticleInstances": 1
         }
 	]
