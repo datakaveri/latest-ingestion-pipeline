@@ -6,7 +6,6 @@
 			"verticleInstances": 1,
 			"dataBrokerIP": "",
 			"dataBrokerPort": 1234,
-			"dataBrokerVhost": "",
 			"dataBrokerUserName": "",
 			"dataBrokerPassword": "",
 			"dataBrokerManagementPort": 15672,
@@ -15,7 +14,12 @@
 			"handshakeTimeout": 6000,
 			"requestedChannelMax": 5,
 			"networkRecoveryInterval": 500,
-			"automaticRecoveryEnabled": true
+			"automaticRecoveryEnabled": true,
+			"prodVhost": "IUDX",
+                         "internalVhost": "IUDX-INTERNAL",
+                        "externalVhost": "IUDX-EXTERNAL"
+
+
 		},
 		{
 			"id": "iudx.ingestion.pipeline.redis.RedisVerticle",

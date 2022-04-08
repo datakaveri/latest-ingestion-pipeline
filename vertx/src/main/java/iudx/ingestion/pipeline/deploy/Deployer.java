@@ -9,16 +9,14 @@ import java.util.List;
 import java.util.Set;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
-
+import java.util.stream.Collectors;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.apache.logging.log4j.core.LoggerContext;
-
 import com.hazelcast.config.Config;
 import com.hazelcast.config.DiscoveryStrategyConfig;
 import com.hazelcast.zookeeper.ZookeeperDiscoveryProperties;
 import com.hazelcast.zookeeper.ZookeeperDiscoveryStrategyFactory;
-
 import io.micrometer.core.instrument.MeterRegistry;
 import io.micrometer.core.instrument.binder.jvm.JvmGcMetrics;
 import io.micrometer.core.instrument.binder.jvm.JvmMemoryMetrics;
@@ -31,8 +29,10 @@ import io.vertx.core.VertxOptions;
 import io.vertx.core.cli.CLI;
 import io.vertx.core.cli.CommandLine;
 import io.vertx.core.cli.Option;
+import io.vertx.core.cli.TypedOption;
 import io.vertx.core.eventbus.EventBusOptions;
 import io.vertx.core.http.HttpServerOptions;
+import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 import io.vertx.core.metrics.MetricsOptions;
 import io.vertx.core.spi.cluster.ClusterManager;
@@ -46,6 +46,19 @@ public class Deployer {
   private static final Logger LOGGER = LogManager.getLogger(Deployer.class);
   private static ClusterManager mgr;
   private static Vertx vertx;
+
+  /**
+   * Deploys clustered vert.x instance of the server. As a JAR, the application requires 3 runtime
+   * arguments:
+   * <ul>
+   * <li>--config/-c : path to the config file</li>
+   * <li>--hostname/-i : the hostname for clustering</li>
+   * <li>--modules/-m : comma separated list of module names to deploy</li>
+   * </ul>
+   *
+   * e.g. <i>java -jar ./fatjar.jar --host $(hostname) -c configs/config.json -m
+   * iudx.ingestion.pipeline.redis.RedisVerticle</i>
+   */
 
   public static void recursiveDeploy(Vertx vertx, JsonObject configs, int i) {
     if (i >= configs.getJsonArray("modules").size()) {
@@ -69,6 +82,42 @@ public class Deployer {
     });
   }
 
+  /**
+   * Recursively deploy modules/verticles (if they exist) present in the `modules` list.
+   *
+   * @param vertx the vert.x instance
+   * @param configs the JSON configuration
+   * @param modules the list of modules to deploy
+   */
+  public static void recursiveDeploy(Vertx vertx, JsonObject configs, List<String> modules) {
+    if (modules.isEmpty()) {
+      LOGGER.info("Deployed requested verticles");
+      return;
+    }
+
+    JsonArray configuredModules = configs.getJsonArray("modules");
+
+    String moduleName = modules.get(0);
+    JsonObject config = configuredModules.stream().map(obj -> (JsonObject) obj)
+        .filter(obj -> obj.getString("id").equals(moduleName)).findFirst().orElse(new JsonObject());
+
+    if (config.isEmpty()) {
+      LOGGER.fatal("Failed to deploy " + moduleName + " cause: Not Found");
+      return;
+    }
+
+    int numInstances = config.getInteger("verticleInstances");
+    vertx.deployVerticle(moduleName,
+        new DeploymentOptions().setInstances(numInstances).setConfig(config), ar -> {
+          if (ar.succeeded()) {
+            LOGGER.info("Deployed " + moduleName);
+            modules.remove(0);
+            recursiveDeploy(vertx, configs, modules);
+          } else {
+            LOGGER.fatal("Failed to deploy " + moduleName + " cause:", ar.cause());
+          }
+        });
+  }
   public static ClusterManager getClusterManager(String host,
                                                   List<String> zookeepers,
                                                   String clusterID) {
@@ -112,7 +161,15 @@ public class Deployer {
 
   }
 
-  public static void deploy(String configPath, String host) {
+  /**
+   * Deploy clustered vert.x instance.
+   *
+   * @param configPath the path for JSON config file
+   * @param host
+   * @param modules list of modules to deploy. If list is empty, all modules are deployed
+   */
+
+  public static void deploy(String configPath, String host, List<String> modules) {
     String config;
     try {
      config = new String(Files.readAllBytes(Paths.get(configPath)), StandardCharsets.UTF_8);
@@ -135,8 +192,14 @@ public class Deployer {
     Vertx.clusteredVertx(options, res -> {
       if (res.succeeded()) {
         vertx = res.result();
+        LOGGER.debug(vertx.isMetricsEnabled());
         setJVMmetrics();
-        recursiveDeploy(vertx, configuration, 0);
+          if (modules.isEmpty()) {
+            recursiveDeploy(vertx, configuration, 0);
+          } else {
+            recursiveDeploy(vertx, configuration, modules);
+          }
+
       } else {
         LOGGER.fatal("Could not join cluster");
       }
@@ -209,15 +272,27 @@ public class Deployer {
         .addOption(new Option().setLongName("config").setShortName("c").setRequired(true)
             .setDescription("configuration file"))
         .addOption(new Option().setLongName("host").setShortName("i").setRequired(true)
-            .setDescription("public host"));
-
+            .setDescription("public host"))
+        .addOption(new TypedOption<String>().setType(String.class).setLongName("modules")
+            .setShortName("m").setRequired(false).setDefaultValue("all").setParsedAsList(true)
+            .setDescription("comma separated list of verticle names to deploy. "
+                + "If omitted, or if `all` is passed, all verticles are deployed"));
     StringBuilder usageString = new StringBuilder();
     cli.usage(usageString);
     CommandLine commandLine = cli.parse(Arrays.asList(args), false);
     if (commandLine.isValid() && !commandLine.isFlagEnabled("help")) {
       String configPath = commandLine.getOptionValue("config");
       String host = commandLine.getOptionValue("host");
-      deploy(configPath, host);
+      List<String> passedModules = commandLine.getOptionValues("modules");
+      List<String> modules = passedModules.stream().distinct().collect(Collectors.toList());
+
+      /* `all` is also passed by default if no -m option given.*/
+      if (modules.contains("all")) {
+        deploy(configPath, host, List.of());
+      } else {
+        deploy(configPath, host, modules);
+      }
+
       Runtime.getRuntime().addShutdownHook(new Thread(() -> gracefulShutdown()));
     } else {
       LOGGER.info(usageString);
