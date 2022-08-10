@@ -8,11 +8,11 @@
 	<name>iudx-ingestion-pipeline</name>
 
 	<properties>
-		<vertx.version>4.0.3</vertx.version>
+		<vertx.version>4.3.2</vertx.version>
 		<openjdk.version>11</openjdk.version>
 		<hazelcast.version>4.0.2</hazelcast.version>
-		<micrometer.version>1.7.2</micrometer.version>
-		<curator.version>5.1.0</curator.version>
+		<micrometer.version>1.9.2</micrometer.version>
+		<curator.version>5.3.0</curator.version>
 		<apache-log4j2.version>2.17.1</apache-log4j2.version>
 		<lmax-disruptor.version>3.4.4</lmax-disruptor.version>
 		<exec.mainClass>iudx.ingestion.pipeline.deploy.Deployer</exec.mainClass>
@@ -64,24 +64,24 @@
 		<dependency>
 			<groupId>org.apache.maven.plugins</groupId>
 			<artifactId>maven-checkstyle-plugin</artifactId>
-			<version>3.1.1</version>
+			<version>3.1.2</version>
 		</dependency>
 		<dependency>
 			<groupId>org.junit.jupiter</groupId>
 			<artifactId>junit-jupiter-api</artifactId>
-			<version>5.5.2</version>
+			<version>5.8.2</version>
 			<scope>test</scope>
 		</dependency>
 		<dependency>
 			<groupId>org.junit.jupiter</groupId>
 			<artifactId>junit-jupiter-params</artifactId>
-			<version>5.5.2</version>
+			<version>5.8.2</version>
 			<scope>test</scope>
 		</dependency>
 		<dependency>
 			<groupId>org.junit.jupiter</groupId>
 			<artifactId>junit-jupiter-engine</artifactId>
-			<version>5.5.2</version>
+			<version>5.8.2</version>
 		</dependency>
 		<dependency>
 			<groupId>io.vertx</groupId>
@@ -101,13 +101,17 @@
 			<artifactId>vertx-redis-client</artifactId>
 		</dependency>
 		<dependency>
+            <groupId>com.ongres.scram</groupId>
+            <artifactId>client</artifactId>
+            <version>2.1</version>
+        </dependency>
+		<dependency>
 			<groupId>io.vertx</groupId>
 			<artifactId>vertx-pg-client</artifactId>
 		</dependency>
 		<dependency>
 			<groupId>com.fasterxml.jackson.core</groupId>
 			<artifactId>jackson-databind</artifactId>
-			<version>2.9.10.3</version>
 		</dependency>
 		<!--  needed for org.codehaus.jackson.annotate  -->
 		 <dependency>
@@ -182,12 +186,12 @@
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-checkstyle-plugin</artifactId>
-				<version>3.1.1</version>
+				<version>3.1.2</version>
 				<dependencies>
 					<dependency>
 						<groupId>com.puppycrawl.tools</groupId>
 						<artifactId>checkstyle</artifactId>
-						<version>8.33</version>
+						<version>10.3.1</version>
 					</dependency>
 				</dependencies>
 				<configuration>
@@ -203,7 +207,7 @@
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-shade-plugin</artifactId>
-				<version>3.2.1</version>
+				<version>3.3.0</version>
 				<executions>
 					<execution>
 						<id>dev</id>
@@ -288,7 +292,7 @@
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-javadoc-plugin</artifactId>
-				<version>3.0.0</version>
+				<version>3.4.0</version>
 				<configuration>
 					<source>${openjdk.version}</source>
 					<target>${openjdk.version}</target>
@@ -297,7 +301,7 @@
 			<plugin>
 				<groupId>org.codehaus.mojo</groupId>
 				<artifactId>exec-maven-plugin</artifactId>
-				<version>3.0.0</version>
+				<version>3.1.0</version>
 				<executions>
 					<execution>
 						<id>ingestion-pipeline</id>
@@ -317,12 +321,12 @@
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-surefire-plugin</artifactId>
-				<version>3.0.0-M5</version>
+				<version>3.0.0-M7</version>
 			</plugin>
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-compiler-plugin</artifactId>
-				<version>3.8.1</version>
+				<version>3.10.1</version>
 				<configuration>
 					<release>${openjdk.version}</release>
 				</configuration>
@@ -335,7 +339,7 @@
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-pmd-plugin</artifactId>
-				<version>3.13.0</version>
+				<version>3.17.0</version>
 				<configuration>
 					<targetJdk>${openjdk.version}</targetJdk>
 					<rulesets>
@@ -350,7 +354,7 @@
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-checkstyle-plugin</artifactId>
-				<version>3.1.1</version>
+				<version>3.1.2</version>
 				<configuration>
 					<consoleOutput>true</consoleOutput>
 					<encoding>UTF-8</encoding>
@@ -369,7 +373,7 @@
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-surefire-report-plugin</artifactId>
-				<version>3.0.0-M5</version>
+				<version>3.0.0-M7</version>
 				<reportSets>
 					<reportSet>
 						<reports>
