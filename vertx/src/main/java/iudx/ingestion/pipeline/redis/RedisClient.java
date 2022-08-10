@@ -27,10 +27,6 @@ public class RedisClient {
   private RedisAPI redis;
   private final Vertx vertx;
   private final JsonObject config;
-  private static final Command JSONGET =
-      Command.create("JSON.GET", -1, 1, 1, 1, false, true, false, false);
-  private static final Command JSONSET =
-      Command.create("JSON.SET", -1, 1, 1, 1, true, false, false, false);
 
   private static final Logger LOGGER = LogManager.getLogger(RedisClient.class);
 
@@ -92,7 +88,7 @@ public class RedisClient {
 
   public Future<JsonObject> get(String key, String path) {
     Promise<JsonObject> promise = Promise.promise();
-    redis.send(JSONGET, key, path).onFailure(res -> {
+    redis.send(Command.JSON_GET, key, path).onFailure(res -> {
       promise.fail(String.format("JSONGET did not work: %s", res.getMessage()));
     }).onSuccess(redisResponse -> {
       if (redisResponse == null) {
@@ -108,26 +104,27 @@ public class RedisClient {
   public Future<Boolean> put(String key, String path, String data) {
     Promise<Boolean> promise = Promise.promise();
     String keyInRedis = redisKeyCache.getIfPresent(key);
+    LOGGER.debug("key in redis : {}",keyInRedis);
     if (keyInRedis != null) {
-      redis.send(JSONSET, key, path, data).onFailure(res -> {
+      redis.send(Command.JSON_SET, key, path, data)
+      .onFailure(res -> {
         LOGGER.error(String.format("JSONSET did not work: %s", res.getMessage()));
         promise.fail(String.format("JSONSET did not work: %s", res.getMessage()));
       }).onSuccess(redisResponse -> {
-        promise.complete();
-      }).onFailure(handler -> {
-        promise.fail("fail to push message");
+        LOGGER.info("Message pushed to Redis. response type {}"+redisResponse);
+        promise.complete(true);
       });
     } else {
       JsonObject origin = new JsonObject();
       JsonObject pathJson = new JsonObject();
       pathJson.put("_init_d", new JsonObject());
       origin.put(key, pathJson);
-      redis.send(JSONSET, key, ".", origin.toString())
+      redis.send(Command.JSON_SET, key, ".", origin.toString())
           .compose(keyCreatedHandler -> {
             redisKeyCache.put(key, "TRUE");
-            return redis.send(JSONSET, key, path, data);
+            return redis.send(Command.JSON_SET, key, path, data);
           }).onSuccess(handler -> {
-            LOGGER.info("Message pushed to Redis.");
+            LOGGER.info("Message pushed to Redis. response type {}"+handler);
             promise.complete(true);
           }).onFailure(handler -> {
             LOGGER.error(
