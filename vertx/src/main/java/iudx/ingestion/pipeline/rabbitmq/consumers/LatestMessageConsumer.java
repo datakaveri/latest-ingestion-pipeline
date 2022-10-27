@@ -92,6 +92,8 @@ public class LatestMessageConsumer implements IConsumer {
     try {
       value = jsonObjectBuffer.toJson();
     } catch (DecodeException e) {
+      value=false;
+      LOGGER.error("Error while decoding the message");
       throw new RuntimeException(e);
     }
     LOGGER.debug("isArray : {}", (value instanceof JsonArray));
