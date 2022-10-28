@@ -44,7 +44,8 @@ public class RedisServiceImpl implements RedisService {
       LOGGER.debug("pushing to redis");
       redisClient.put(key, pathParam.toString(), data).onComplete(res -> {
         if (res.failed()) {
-          LOGGER.error(res.cause());
+          LOGGER.error("Failed to publish latest value for key : {} to redis",key);
+          handler.handle(Future.failedFuture("failed to publish to redis"));
         } else {
           handler.handle(Future.succeededFuture(response));
         }
