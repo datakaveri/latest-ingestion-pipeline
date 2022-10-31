@@ -38,18 +38,18 @@ public class RedisServiceImpl implements RedisService {
           .append(".")
           .append(path);
 
-      LOGGER.debug("path param : " + pathParam);
+      LOGGER.debug("path param : {}" , pathParam);
 
       JsonObject response = new JsonObject().put("result", "published");
       LOGGER.debug("pushing to redis");
       redisClient.put(key, pathParam.toString(), data).onComplete(res -> {
         if (res.failed()) {
-          LOGGER.error(res.cause());
+          LOGGER.error("Failed to publish latest value for key : {} to redis",key);
+          handler.handle(Future.failedFuture("failed to publish to redis"));
         } else {
           handler.handle(Future.succeededFuture(response));
         }
       });
-
     } else {
       handler.handle(Future.failedFuture("null/empty message rejected."));
     }
