@@ -113,12 +113,6 @@
 			<groupId>com.fasterxml.jackson.core</groupId>
 			<artifactId>jackson-databind</artifactId>
 		</dependency>
-		<!--  needed for org.codehaus.jackson.annotate  -->
-		 <dependency>
-		     <groupId>org.codehaus.jackson</groupId>
-		     <artifactId>jackson-mapper-asl</artifactId>
-		     <version>1.9.13</version>
-		 </dependency>
 
 		<!-- Packages for Vertx metrics through micrometer  -->
 		<dependency>
