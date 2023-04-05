@@ -2,7 +2,7 @@
 
 MAJOR_RELEASE=4
 MINOR_RELEASE=5
-PATCH_RELEASE=alpha
+PATCH_RELEASE=0
 COMMIT_ID=`git log -1 --pretty=%h` # last commit-id in short form
 
 # To be executed from project root
