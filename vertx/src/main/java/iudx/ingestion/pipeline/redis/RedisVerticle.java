@@ -1,15 +1,14 @@
 package iudx.ingestion.pipeline.redis;
 
-import static iudx.ingestion.pipeline.common.Constants.REDIS_SERVICE_ADDRESS;
-
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
+import static iudx.ingestion.pipeline.common.Constants.*;
 
 import io.vertx.core.AbstractVerticle;
 import io.vertx.core.eventbus.MessageConsumer;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.web.client.WebClientOptions;
 import io.vertx.serviceproxy.ServiceBinder;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 public class RedisVerticle extends AbstractVerticle {
 
@@ -25,23 +24,24 @@ public class RedisVerticle extends AbstractVerticle {
   public void start() throws Exception {
     new RedisClient(vertx, config())
         .start()
-        .onSuccess(handler -> {
-          client = handler;
-          redisService = new RedisServiceImpl(client);
+        .onSuccess(
+            handler -> {
+              client = handler;
+              redisService = new RedisServiceImpl(client);
 
-          binder = new ServiceBinder(vertx);
-          consumer = binder
-              .setAddress(REDIS_SERVICE_ADDRESS)
-              .register(RedisService.class, redisService);
-
-        }).onFailure(handler -> {
-          LOGGER.error("failed to start redis client");
-        });
+              binder = new ServiceBinder(vertx);
+              consumer =
+                  binder
+                      .setAddress(REDIS_SERVICE_ADDRESS)
+                      .register(RedisService.class, redisService);
+            })
+        .onFailure(
+            handler -> {
+              LOGGER.error("failed to start redis client");
+            });
 
     WebClientOptions options = new WebClientOptions();
-    options.setTrustAll(true)
-        .setVerifyHost(false)
-        .setSsl(true);
+    options.setTrustAll(true).setVerifyHost(false).setSsl(true);
   }
 
   @Override
@@ -51,5 +51,4 @@ public class RedisVerticle extends AbstractVerticle {
     }
     binder.unregister(consumer);
   }
-
 }

@@ -96,7 +96,7 @@ In order to connect to the appropriate RabbitMQ instance, required information s
  **RabbitMQ Verticle**
 ```
 {
-    "id": "iudx.ingestion.pipeline.rabbitmq.RabbitMQVerticle",
+    "id": "iudx.ingestion.pipeline.rabbitmq.RabbitMqVerticle",
     "verticleInstances": <num-of-verticle-instances>,
     "dataBrokerIP": <rabbit mq ip>,
     "dataBrokerPort": <port-number>,

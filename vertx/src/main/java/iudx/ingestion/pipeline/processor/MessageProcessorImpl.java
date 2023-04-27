@@ -1,39 +1,35 @@
 package iudx.ingestion.pipeline.processor;
 
-import static iudx.ingestion.pipeline.common.Constants.DEFAULT_SUFFIX;
-import static iudx.ingestion.pipeline.common.Constants.RMQ_PROCESSED_MSG_EX;
-import static iudx.ingestion.pipeline.common.Constants.RMQ_PROCESSED_MSG_EX_ROUTING_KEY;
-import org.apache.commons.codec.digest.DigestUtils;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
+import static iudx.ingestion.pipeline.common.Constants.*;
+
 import com.fasterxml.jackson.annotation.JsonProperty;
 import io.vertx.core.AsyncResult;
 import io.vertx.core.Future;
 import io.vertx.core.Handler;
 import io.vertx.core.Promise;
-import io.vertx.core.Vertx;
 import io.vertx.core.json.JsonObject;
 import iudx.ingestion.pipeline.cache.CacheService;
-import iudx.ingestion.pipeline.cache.cacheImpl.CacheType;
-import iudx.ingestion.pipeline.rabbitmq.RabbitMQService;
+import iudx.ingestion.pipeline.cache.cacheimpl.CacheType;
+import iudx.ingestion.pipeline.rabbitmq.RabbitMqService;
+import org.apache.commons.codec.digest.DigestUtils;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 public class MessageProcessorImpl implements MessageProcessService {
 
   private static final Logger LOGGER = LogManager.getLogger(MessageProcessorImpl.class);
-  private final Vertx vertx;
   private final CacheService cache;
   private final String defaultAttribValue = DEFAULT_SUFFIX;
-  private final RabbitMQService rabbitMQService;
+  private final RabbitMqService rabbitMqService;
 
-  public MessageProcessorImpl(Vertx vertx, CacheService cache, RabbitMQService rabbitMQService) {
-    this.vertx = vertx;
+  public MessageProcessorImpl(CacheService cache, RabbitMqService rabbitMqService) {
     this.cache = cache;
-    this.rabbitMQService = rabbitMQService;
+    this.rabbitMqService = rabbitMqService;
   }
 
   @Override
-  public MessageProcessService process(JsonObject message,
-      Handler<AsyncResult<JsonObject>> handler) {
+  public MessageProcessService process(
+      JsonObject message, Handler<AsyncResult<JsonObject>> handler) {
     LOGGER.info("message procesing starts : ");
     if (message == null || message.isEmpty()) {
       handler.handle(Future.failedFuture("empty/null message received"));
@@ -41,21 +37,25 @@ public class MessageProcessorImpl implements MessageProcessService {
 
       Future<ProcessedMessage> processedMsgFuture = getMessage(message);
 
-      processedMsgFuture.onSuccess(msgHandler -> {
-        JsonObject processedJson = JsonObject.mapFrom(msgHandler);
-        LOGGER.debug("message publishing to processed Q : ");
-        rabbitMQService.publish(RMQ_PROCESSED_MSG_EX, RMQ_PROCESSED_MSG_EX_ROUTING_KEY,
-            processedJson,
-            publishHandler -> {
-              if (publishHandler.succeeded()) {
-                LOGGER.debug("published");
-                handler.handle(Future.succeededFuture(new JsonObject().put("result", "published")));
-              } else {
-                LOGGER.error("published failed" + publishHandler.cause().getMessage());
-                handler.handle(Future.failedFuture("publish failed"));
-              }
-            });
-      });
+      processedMsgFuture.onSuccess(
+          msgHandler -> {
+            JsonObject processedJson = JsonObject.mapFrom(msgHandler);
+            LOGGER.debug("message publishing to processed Q : ");
+            rabbitMqService.publish(
+                RMQ_PROCESSED_MSG_EX,
+                RMQ_PROCESSED_MSG_EX_ROUTING_KEY,
+                processedJson,
+                publishHandler -> {
+                  if (publishHandler.succeeded()) {
+                    LOGGER.debug("published");
+                    handler.handle(
+                        Future.succeededFuture(new JsonObject().put("result", "published")));
+                  } else {
+                    LOGGER.error("published failed" + publishHandler.cause().getMessage());
+                    handler.handle(Future.failedFuture("publish failed"));
+                  }
+                });
+          });
     }
     return this;
   }
@@ -69,17 +69,19 @@ public class MessageProcessorImpl implements MessageProcessService {
     cacheJson.put("type", CacheType.UNIQUE_ATTRIBUTES);
     cacheJson.put("key", id);
 
-    cache.get(cacheJson, cacheHandler -> {
-      if (cacheHandler.succeeded()) {
-        JsonObject uaJson = cacheHandler.result();
-        String uniqueAttrib = uaJson.getString("value");
-        ProcessedMessage message = getProcessedMessage(json, uniqueAttrib);
-        promise.complete(message);
-      } else {
-        ProcessedMessage message = getProcessedMessage(json, null);
-        promise.complete(message);
-      }
-    });
+    cache.get(
+        cacheJson,
+        cacheHandler -> {
+          if (cacheHandler.succeeded()) {
+            JsonObject uaJson = cacheHandler.result();
+            String uniqueAttrib = uaJson.getString("value");
+            ProcessedMessage message = getProcessedMessage(json, uniqueAttrib);
+            promise.complete(message);
+          } else {
+            ProcessedMessage message = getProcessedMessage(json, null);
+            promise.complete(message);
+          }
+        });
 
     return promise.future();
   }
@@ -92,26 +94,28 @@ public class MessageProcessorImpl implements MessageProcessService {
       id.append("/").append(defaultAttribValue);
       pathParam.append("_").append(DigestUtils.shaHex(id.toString()));
     } else {
-      String value = (String) json.getString(pathParamAttribute);
+      String value = json.getString(pathParamAttribute);
       id.append("/").append(value);
       pathParam.append("_").append(DigestUtils.shaHex(id.toString()));
     }
-    ProcessedMessage message = new ProcessedMessage(json.getString("id")
-        .replaceAll("/", "_")
-        .replaceAll("-", "_")
-        .replaceAll("\\.", "_"), pathParam.toString(), json);
+    ProcessedMessage message =
+        new ProcessedMessage(
+            json.getString("id").replaceAll("/", "_").replaceAll("-", "_").replaceAll("\\.", "_"),
+            pathParam.toString(),
+            json);
 
     return message;
   }
 
-
   private class ProcessedMessage {
     @JsonProperty("key")
-    private String key;
+    private final String key;
+
     @JsonProperty("path_param")
-    private String pathParam;
+    private final String pathParam;
+
     @JsonProperty("data")
-    private JsonObject data;
+    private final JsonObject data;
 
     ProcessedMessage(String key, String pathParam, JsonObject data) {
       this.key = key;
@@ -136,5 +140,4 @@ public class MessageProcessorImpl implements MessageProcessService {
       return "Key : " + this.key + " pathParam : " + pathParam + " data : " + data;
     }
   }
-
 }

@@ -6,7 +6,7 @@
 	"clusterId": "iudx-ingestion-pipeline-cluster",
 	"modules": [
 		{
-			"id": "iudx.ingestion.pipeline.rabbitmq.RabbitMQVerticle",
+			"id": "iudx.ingestion.pipeline.rabbitmq.RabbitMqVerticle",
 			"verticleInstances": 1,
 			"dataBrokerIP": "",
 			"dataBrokerPort": 1234,

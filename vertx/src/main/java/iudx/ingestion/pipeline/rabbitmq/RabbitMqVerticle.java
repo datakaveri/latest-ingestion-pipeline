@@ -1,47 +1,35 @@
 package iudx.ingestion.pipeline.rabbitmq;
 
-import static iudx.ingestion.pipeline.common.Constants.CACHE_SERVICE_ADDRESS;
-import static iudx.ingestion.pipeline.common.Constants.MSG_PROCESS_ADDRESS;
-import static iudx.ingestion.pipeline.common.Constants.REDIS_SERVICE_ADDRESS;
-import static iudx.ingestion.pipeline.common.Constants.RMQ_SERVICE_ADDRESS;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
+import static iudx.ingestion.pipeline.common.Constants.*;
+
 import io.vertx.core.AbstractVerticle;
 import io.vertx.core.eventbus.MessageConsumer;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.web.client.WebClientOptions;
-import io.vertx.rabbitmq.RabbitMQClient;
 import io.vertx.rabbitmq.RabbitMQOptions;
 import io.vertx.serviceproxy.ServiceBinder;
 import iudx.ingestion.pipeline.cache.CacheService;
-import iudx.ingestion.pipeline.common.IConsumer;
-import iudx.ingestion.pipeline.common.IProducer;
-import iudx.ingestion.pipeline.common.VHosts;
+import iudx.ingestion.pipeline.common.ConsumerAction;
+import iudx.ingestion.pipeline.common.VirtualHosts;
 import iudx.ingestion.pipeline.processor.MessageProcessService;
-import iudx.ingestion.pipeline.rabbitmq.consumers.LatestMessageConsumer;
-import iudx.ingestion.pipeline.rabbitmq.consumers.ProcessedMessageConsumer;
-import iudx.ingestion.pipeline.rabbitmq.consumers.UniqueAttributeConsumer;
+import iudx.ingestion.pipeline.rabbitmq.consumers.LatestMessageConsumerAction;
+import iudx.ingestion.pipeline.rabbitmq.consumers.ProcessedMessageConsumerAction;
+import iudx.ingestion.pipeline.rabbitmq.consumers.UniqueAttributeConsumerAction;
 import iudx.ingestion.pipeline.redis.RedisService;
 
-public class RabbitMQVerticle extends AbstractVerticle {
-
-  private static final Logger LOGGER = LogManager.getLogger(RabbitMQVerticle.class);
-
-
-  private IProducer rabbitProducer;
-  private RabbitMQService rabbitMQService;
+public class RabbitMqVerticle extends AbstractVerticle {
+  private RabbitMqService rabbitMqService;
 
   private MessageProcessService messageProcessService;
   private RedisService redisService;
   private CacheService cacheService;
 
-  private IConsumer processedMsgConsumer;
-  private IConsumer latestMessageConsumer;
-  private IConsumer uniqueAttribConsumer;
+  private ConsumerAction processedMsgConsumer;
+  private ConsumerAction latestMessageConsumer;
+  private ConsumerAction uniqueAttribConsumer;
 
   private RabbitMQOptions config;
-  private RabbitMQClient client;
-  private String dataBrokerIP;
+  private String dataBrokerIp;
   private int dataBrokerPort;
   private int dataBrokerManagementPort;
   private String dataBrokerUserName;
@@ -59,7 +47,7 @@ public class RabbitMQVerticle extends AbstractVerticle {
   @Override
   public void start() throws Exception {
 
-    dataBrokerIP = config().getString("dataBrokerIP");
+    dataBrokerIp = config().getString("dataBrokerIP");
     dataBrokerPort = config().getInteger("dataBrokerPort");
     dataBrokerManagementPort = config().getInteger("dataBrokerManagementPort");
     dataBrokerUserName = config().getString("dataBrokerUserName");
@@ -75,7 +63,7 @@ public class RabbitMQVerticle extends AbstractVerticle {
     config = new RabbitMQOptions();
     config.setUser(dataBrokerUserName);
     config.setPassword(dataBrokerPassword);
-    config.setHost(dataBrokerIP);
+    config.setHost(dataBrokerIp);
     config.setPort(dataBrokerPort);
     config.setConnectionTimeout(connectionTimeout);
     config.setRequestedHeartbeat(requestedHeartbeat);
@@ -87,15 +75,14 @@ public class RabbitMQVerticle extends AbstractVerticle {
     webConfig = new WebClientOptions();
     webConfig.setKeepAlive(true);
     webConfig.setConnectTimeout(86400000);
-    webConfig.setDefaultHost(dataBrokerIP);
+    webConfig.setDefaultHost(dataBrokerIp);
     webConfig.setDefaultPort(dataBrokerManagementPort);
     webConfig.setKeepAliveTimeout(86400000);
 
-
     RabbitMQOptions internalVhostOptions = new RabbitMQOptions(config);
-    String internalCommVhost = config().getString(VHosts.IUDX_INTERNAL.value);
+    String internalCommVhost = config().getString(VirtualHosts.IUDX_INTERNAL.value);
     internalVhostOptions.setVirtualHost(internalCommVhost);
-    rabbitMQService = new RabbitMQServiceimpl(vertx, internalVhostOptions);
+    rabbitMqService = new RabbitMqServiceImpl(vertx, internalVhostOptions);
 
     messageProcessService = MessageProcessService.createProxy(vertx, MSG_PROCESS_ADDRESS);
     redisService = RedisService.createProxy(vertx, REDIS_SERVICE_ADDRESS);
@@ -103,13 +90,15 @@ public class RabbitMQVerticle extends AbstractVerticle {
 
     // redis-latest Q will be in PROD Vhost
     RabbitMQOptions prodOptions = new RabbitMQOptions(config);
-    String prodVhost = config().getString(VHosts.IUDX_PROD.value);
+    String prodVhost = config().getString(VirtualHosts.IUDX_PROD.value);
     prodOptions.setVirtualHost(prodVhost);
-    latestMessageConsumer = new LatestMessageConsumer(vertx, prodOptions, messageProcessService);
+    latestMessageConsumer =
+        new LatestMessageConsumerAction(vertx, prodOptions, messageProcessService);
 
-
-    processedMsgConsumer = new ProcessedMessageConsumer(vertx, internalVhostOptions, redisService);
-    uniqueAttribConsumer = new UniqueAttributeConsumer(vertx, internalVhostOptions, cacheService);
+    processedMsgConsumer =
+        new ProcessedMessageConsumerAction(vertx, internalVhostOptions, redisService);
+    uniqueAttribConsumer =
+        new UniqueAttributeConsumerAction(vertx, internalVhostOptions, cacheService);
 
     processedMsgConsumer.start();
     latestMessageConsumer.start();
@@ -117,12 +106,8 @@ public class RabbitMQVerticle extends AbstractVerticle {
 
     binder = new ServiceBinder(vertx);
 
-    consumer = binder
-        .setAddress(RMQ_SERVICE_ADDRESS)
-        .register(RabbitMQService.class, rabbitMQService);
-
-
-
+    consumer =
+        binder.setAddress(RMQ_SERVICE_ADDRESS).register(RabbitMqService.class, rabbitMqService);
   }
 
   @Override

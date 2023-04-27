@@ -20,6 +20,8 @@ ARG VERSION
 ENV JAR="iudx.ingestion.pipeline-dev-${VERSION}-fat.jar"
 
 WORKDIR /usr/share/app
+COPY iudx-pmd-ruleset.xml iudx-pmd-ruleset.xml
+COPY google_checks.xml google_checks.xml
 # Copying clustered fatjar from builder stage to final image
 COPY --from=builder /usr/share/app/target/${JAR} ./fatjar.jar
 # Creating a non-root user

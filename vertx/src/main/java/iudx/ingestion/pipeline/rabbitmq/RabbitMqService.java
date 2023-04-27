@@ -11,18 +11,18 @@ import io.vertx.core.json.JsonObject;
 
 @VertxGen
 @ProxyGen
-public interface RabbitMQService {
+public interface RabbitMqService {
 
   @Fluent
-  RabbitMQService publish(String exchange, String routingkey, JsonObject data,
-      Handler<AsyncResult<JsonObject>> handler);
+  RabbitMqService publish(String exchange, String routingkey, JsonObject data,
+                          Handler<AsyncResult<JsonObject>> handler);
 
   @Fluent
-  RabbitMQService consume(String queue, Handler<AsyncResult<JsonObject>> handler);
+  RabbitMqService consume(String queue, Handler<AsyncResult<JsonObject>> handler);
 
   @GenIgnore
-  static RabbitMQService createProxy(Vertx vertx, String address) {
-    return new RabbitMQServiceVertxEBProxy(vertx, address);
+  static RabbitMqService createProxy(Vertx vertx, String address) {
+    return new RabbitMqServiceVertxEBProxy(vertx, address);
   }
 
 }

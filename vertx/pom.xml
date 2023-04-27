@@ -13,6 +13,9 @@
 		<hazelcast.version>4.0.2</hazelcast.version>
 		<micrometer.version>1.9.2</micrometer.version>
 		<curator.version>5.3.0</curator.version>
+		<checkstyle.version>10.5.0</checkstyle.version>
+		<maven-checkstyle-plugin-google.version>3.1.2</maven-checkstyle-plugin-google.version>
+		<maven-pmd-plugin.version>3.17.0</maven-pmd-plugin.version>
 		<apache-log4j2.version>2.17.1</apache-log4j2.version>
 		<lmax-disruptor.version>3.4.4</lmax-disruptor.version>
 		<exec.mainClass>iudx.ingestion.pipeline.deploy.Deployer</exec.mainClass>
@@ -325,6 +328,42 @@
 					<release>${openjdk.version}</release>
 				</configuration>
 			</plugin>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-pmd-plugin</artifactId>
+				<version>${maven-pmd-plugin.version}</version>
+				<configuration>
+					<targetJdk>${openjdk.version}</targetJdk>
+					<rulesets>
+						<ruleset>./iudx-pmd-ruleset.xml</ruleset>
+					</rulesets>
+					<printFailingErrors>true</printFailingErrors>
+					<excludeRoots>
+						<excludeRoot>target/generated-sources</excludeRoot>
+					</excludeRoots>
+				</configuration>
+			</plugin>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-checkstyle-plugin</artifactId>
+				<version>${maven-checkstyle-plugin-google.version}</version>
+				<dependencies>
+					<dependency>
+						<groupId>com.puppycrawl.tools</groupId>
+						<artifactId>checkstyle</artifactId>
+						<version>${checkstyle.version}</version>
+					</dependency>
+				</dependencies>
+				<configuration>
+					<!-- <violationSeverity>warning</violationSeverity> -->
+					<consoleOutput>true</consoleOutput>
+					<encoding>UTF-8</encoding>
+					<configLocation>./google_checks.xml</configLocation>
+					<sourceDirectories>
+						<sourceDirectory>${project.build.sourceDirectory}</sourceDirectory>
+					</sourceDirectories>
+				</configuration>
+			</plugin>
 		</plugins>
 	</build>
 
@@ -332,37 +371,8 @@
 		<plugins>
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-pmd-plugin</artifactId>
-				<version>3.17.0</version>
-				<configuration>
-					<targetJdk>${openjdk.version}</targetJdk>
-					<rulesets>
-						<ruleset>/rulesets/java/braces.xml</ruleset>
-						<ruleset>/rulesets/java/naming.xml</ruleset>
-						<ruleset>/rulesets/java/imports.xml</ruleset>
-						<ruleset>/rulesets/java/unnecessary.xml</ruleset>
-						<ruleset>/rulesets/java/unusedcode.xml</ruleset>
-					</rulesets>
-				</configuration>
-			</plugin>
-			<plugin>
-				<groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-checkstyle-plugin</artifactId>
-				<version>3.1.2</version>
-				<configuration>
-					<consoleOutput>true</consoleOutput>
-					<encoding>UTF-8</encoding>
-					<configLocation>google_checks.xml</configLocation>
-					<failOnViolation>false</failOnViolation>
-				</configuration>
-
-				<reportSets>
-					<reportSet>
-						<reports>
-							<report>checkstyle</report>
-						</reports>
-					</reportSet>
-				</reportSets>
+				<artifactId>maven-jxr-plugin</artifactId>
+				<version>3.3.0</version>
 			</plugin>
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
