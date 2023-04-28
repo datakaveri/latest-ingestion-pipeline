@@ -8,6 +8,8 @@ services:
     image: iudx/lip-depl:latest
     volumes:
       - ./secrets/all-verticles-configs/config-depl.json:/usr/share/app/secrets/all-verticles-configs/config.json
+      - ./iudx-pmd-ruleset.xml:/usr/share/app/iudx-pmd-ruleset.xml
+      - ./google_checks.xml:/usr/share/app/google_checks.xml
     expose:
       - "9000"
     networks: 

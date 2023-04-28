@@ -9,26 +9,22 @@ public class Constants {
   public static final String PG_SERVICE_ADDRESS = "iudx.ingestion.postgres.service";
 
   // RMQ
-  public final static String RMQ_LATEST_DATA_Q = "redis-latest";
+  public static final String RMQ_LATEST_DATA_Q = "redis-latest";
 
+  public static final String RMQ_PROCESSED_MSG_EX = "processed-messages";
+  public static final String RMQ_PROCESSED_MSG_Q = "lip-processed-messages";
+  public static final String RMQ_PROCESSED_MSG_EX_ROUTING_KEY = "processed";
 
-  public final static String RMQ_PROCESSED_MSG_EX = "processed-messages";
-  public final static String RMQ_PROCESSED_MSG_Q = "lip-processed-messages";
-  public final static String RMQ_PROCESSED_MSG_EX_ROUTING_KEY = "processed";
-
-  public final static String UNIQUE_ATTR_Q = "lip-unique-attributes";
+  public static final String UNIQUE_ATTR_Q = "lip-unique-attributes";
 
   // EventBus
-  public final static String EB_RECEIVED_MSG_ADDRESS = "received.message";
-  public final static String EB_PROCESSED_MSG_ADDRESS = "processed.message";
-  public final static String EB_PUBLISH_2_REDIS = "publish2redis.message";
-
+  public static final String EB_RECEIVED_MSG_ADDRESS = "received.message";
+  public static final String EB_PROCESSED_MSG_ADDRESS = "processed.message";
+  public static final String EB_PUBLISH_2_REDIS = "publish2redis.message";
 
   //
-  public final static String DEFAULT_SUFFIX = "_d";
-
+  public static final String DEFAULT_SUFFIX = "_d";
 
   // pg queries
-  public final static String SELECT_UNIQUE_ATTRIBUTE = "SELECT * from unique_attributes";
-
+  public static final String SELECT_UNIQUE_ATTRIBUTE = "SELECT * from unique_attributes";
 }

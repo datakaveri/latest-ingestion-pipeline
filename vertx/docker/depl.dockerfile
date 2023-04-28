@@ -20,6 +20,8 @@ ARG VERSION
 ENV JAR="iudx.ingestion.pipeline-cluster-${VERSION}-fat.jar"
 
 WORKDIR /usr/share/app
+COPY iudx-pmd-ruleset.xml iudx-pmd-ruleset.xml
+COPY google_checks.xml google_checks.xml
 # Expose metrics port
 EXPOSE  9000
 # Copying clustered fatjar from builder stage to final image

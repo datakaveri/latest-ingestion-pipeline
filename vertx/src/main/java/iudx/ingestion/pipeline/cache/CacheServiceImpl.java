@@ -1,32 +1,30 @@
 package iudx.ingestion.pipeline.cache;
 
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 import io.vertx.core.AsyncResult;
 import io.vertx.core.Future;
 import io.vertx.core.Handler;
 import io.vertx.core.Vertx;
 import io.vertx.core.json.JsonObject;
-import iudx.ingestion.pipeline.cache.cacheImpl.CacheType;
-import iudx.ingestion.pipeline.cache.cacheImpl.IudxCache;
-import iudx.ingestion.pipeline.cache.cacheImpl.UniqueAttributesCache;
+import iudx.ingestion.pipeline.cache.cacheimpl.CacheType;
+import iudx.ingestion.pipeline.cache.cacheimpl.IudxCache;
+import iudx.ingestion.pipeline.cache.cacheimpl.UniqueAttributesCache;
 import iudx.ingestion.pipeline.postgres.PostgresService;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 public class CacheServiceImpl implements CacheService {
 
   private static final Logger LOGGER = LogManager.getLogger(CacheServiceImpl.class);
 
-  private IudxCache uniqueAttribsCache;
-  private PostgresService postgresService;
+  private final IudxCache uniqueAttribsCache;
+  private final PostgresService postgresService;
 
   public CacheServiceImpl(Vertx vertx, PostgresService pgService) {
     this.postgresService = pgService;
     uniqueAttribsCache = new UniqueAttributesCache(vertx, postgresService);
   }
 
-  /**
-   * {@inheritDoc}
-   */
+  /** {@inheritDoc} */
   @Override
   public CacheService get(JsonObject request, Handler<AsyncResult<JsonObject>> handler) {
     IudxCache cache = null;
@@ -54,13 +52,10 @@ public class CacheServiceImpl implements CacheService {
       handler.handle(Future.failedFuture("null key passed."));
     }
 
-
     return this;
   }
 
-  /**
-   * {@inheritDoc}
-   */
+  /** {@inheritDoc} */
   @Override
   public CacheService put(JsonObject request, Handler<AsyncResult<JsonObject>> handler) {
     LOGGER.debug("message received from for cache put operation");
@@ -86,9 +81,7 @@ public class CacheServiceImpl implements CacheService {
     return this;
   }
 
-  /**
-   * {@inheritDoc}
-   */
+  /** {@inheritDoc} */
   @Override
   public CacheService refresh(JsonObject request, Handler<AsyncResult<JsonObject>> handler) {
     LOGGER.debug("message received for cache refresh()");
@@ -120,16 +113,11 @@ public class CacheServiceImpl implements CacheService {
 
     CacheType cacheType = CacheType.valueOf(json.getString("type"));
     IudxCache cache = null;
-    switch (cacheType) {
-      case UNIQUE_ATTRIBUTES: {
-        cache = uniqueAttribsCache;
-        break;
-      }
-      default: {
-        throw new IllegalArgumentException("No cache type specified");
-      }
+    if (cacheType == CacheType.UNIQUE_ATTRIBUTES) {
+      cache = uniqueAttribsCache;
+    } else {
+      throw new IllegalArgumentException("No cache type specified");
     }
     return cache;
   }
-
 }

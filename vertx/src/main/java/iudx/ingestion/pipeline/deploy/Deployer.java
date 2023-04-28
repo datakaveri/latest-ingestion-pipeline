@@ -1,18 +1,5 @@
 package iudx.ingestion.pipeline.deploy;
 
-import java.nio.charset.StandardCharsets;
-import java.nio.file.Files;
-import java.nio.file.Paths;
-import java.util.Arrays;
-import java.util.EnumSet;
-import java.util.List;
-import java.util.Set;
-import java.util.concurrent.CountDownLatch;
-import java.util.concurrent.TimeUnit;
-import java.util.stream.Collectors;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
-import org.apache.logging.log4j.core.LoggerContext;
 import com.hazelcast.config.Config;
 import com.hazelcast.config.DiscoveryStrategyConfig;
 import com.hazelcast.zookeeper.ZookeeperDiscoveryProperties;
@@ -41,6 +28,19 @@ import io.vertx.micrometer.MicrometerMetricsOptions;
 import io.vertx.micrometer.VertxPrometheusOptions;
 import io.vertx.micrometer.backends.BackendRegistries;
 import io.vertx.spi.cluster.hazelcast.HazelcastClusterManager;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Paths;
+import java.util.Arrays;
+import java.util.EnumSet;
+import java.util.List;
+import java.util.Set;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.TimeUnit;
+import java.util.stream.Collectors;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+import org.apache.logging.log4j.core.LoggerContext;
 
 public class Deployer {
   private static final Logger LOGGER = LogManager.getLogger(Deployer.class);
@@ -50,16 +50,15 @@ public class Deployer {
   /**
    * Deploys clustered vert.x instance of the server. As a JAR, the application requires 3 runtime
    * arguments:
-   * <ul>
-   * <li>--config/-c : path to the config file</li>
-   * <li>--hostname/-i : the hostname for clustering</li>
-   * <li>--modules/-m : comma separated list of module names to deploy</li>
-   * </ul>
    *
+   * <ul>
+   *   <li>--config/-c : path to the config file
+   *   <li>--hostname/-i : the hostname for clustering
+   *   <li>--modules/-m : comma separated list of module names to deploy
+   * </ul>
    * e.g. <i>java -jar ./fatjar.jar --host $(hostname) -c configs/config.json -m
    * iudx.ingestion.pipeline.redis.RedisVerticle</i>
    */
-
   public static void recursiveDeploy(Vertx vertx, JsonObject configs, int i) {
     if (i >= configs.getJsonArray("modules").size()) {
       LOGGER.info("Deployed all");
@@ -68,18 +67,17 @@ public class Deployer {
     JsonObject config = configs.getJsonArray("modules").getJsonObject(i);
     String moduleName = config.getString("id");
     int numInstances = config.getInteger("verticleInstances");
-    vertx.deployVerticle(moduleName,
-                           new DeploymentOptions()
-                                  .setInstances(numInstances)
-                                  .setConfig(config),
-                          ar -> {
-      if (ar.succeeded()) {
-        LOGGER.info("Deployed " + moduleName);
-        recursiveDeploy(vertx, configs, i+1);
-      } else {
-        LOGGER.fatal("Failed to deploy " + moduleName + " cause:", ar.cause());
-      }
-    });
+    vertx.deployVerticle(
+        moduleName,
+        new DeploymentOptions().setInstances(numInstances).setConfig(config),
+        ar -> {
+          if (ar.succeeded()) {
+            LOGGER.info("Deployed " + moduleName);
+            recursiveDeploy(vertx, configs, i + 1);
+          } else {
+            LOGGER.fatal("Failed to deploy " + moduleName + " cause:", ar.cause());
+          }
+        });
   }
 
   /**
@@ -98,8 +96,12 @@ public class Deployer {
     JsonArray configuredModules = configs.getJsonArray("modules");
 
     String moduleName = modules.get(0);
-    JsonObject config = configuredModules.stream().map(obj -> (JsonObject) obj)
-        .filter(obj -> obj.getString("id").equals(moduleName)).findFirst().orElse(new JsonObject());
+    JsonObject config =
+        configuredModules.stream()
+            .map(obj -> (JsonObject) obj)
+            .filter(obj -> obj.getString("id").equals(moduleName))
+            .findFirst()
+            .orElse(new JsonObject());
 
     if (config.isEmpty()) {
       LOGGER.fatal("Failed to deploy " + moduleName + " cause: Not Found");
@@ -107,8 +109,10 @@ public class Deployer {
     }
 
     int numInstances = config.getInteger("verticleInstances");
-    vertx.deployVerticle(moduleName,
-        new DeploymentOptions().setInstances(numInstances).setConfig(config), ar -> {
+    vertx.deployVerticle(
+        moduleName,
+        new DeploymentOptions().setInstances(numInstances).setConfig(config),
+        ar -> {
           if (ar.succeeded()) {
             LOGGER.info("Deployed " + moduleName);
             modules.remove(0);
@@ -118,9 +122,9 @@ public class Deployer {
           }
         });
   }
-  public static ClusterManager getClusterManager(String host,
-                                                  List<String> zookeepers,
-                                                  String clusterID) {
+
+  public static ClusterManager getClusterManager(
+      String host, List<String> zookeepers, String clusterId) {
     Config config = new Config();
     config.getNetworkConfig().getJoin().getMulticastConfig().setEnabled(false);
     config.getNetworkConfig().setPublicAddress(host);
@@ -128,13 +132,14 @@ public class Deployer {
     config.setProperty("hazelcast.logging.type", "log4j2");
     DiscoveryStrategyConfig discoveryStrategyConfig =
         new DiscoveryStrategyConfig(new ZookeeperDiscoveryStrategyFactory());
-    discoveryStrategyConfig.addProperty(ZookeeperDiscoveryProperties.ZOOKEEPER_URL.key(),
-                                          String.join(",", zookeepers));
-    discoveryStrategyConfig.addProperty(ZookeeperDiscoveryProperties.GROUP.key(), clusterID);
-    config.getNetworkConfig()
-          .getJoin()
-          .getDiscoveryConfig()
-          .addDiscoveryStrategyConfig(discoveryStrategyConfig);
+    discoveryStrategyConfig.addProperty(
+        ZookeeperDiscoveryProperties.ZOOKEEPER_URL.key(), String.join(",", zookeepers));
+    discoveryStrategyConfig.addProperty(ZookeeperDiscoveryProperties.GROUP.key(), clusterId);
+    config
+        .getNetworkConfig()
+        .getJoin()
+        .getDiscoveryConfig()
+        .addDiscoveryStrategyConfig(discoveryStrategyConfig);
 
     return new HazelcastClusterManager(config);
   }
@@ -143,36 +148,35 @@ public class Deployer {
     return new MicrometerMetricsOptions()
         .setPrometheusOptions(
             new VertxPrometheusOptions()
-              .setEnabled(true)
-              .setStartEmbeddedServer(true)
-              .setEmbeddedServerOptions(new HttpServerOptions().setPort(9000)))
+                .setEnabled(true)
+                .setStartEmbeddedServer(true)
+                .setEmbeddedServerOptions(new HttpServerOptions().setPort(9000)))
         // .setPublishQuantiles(true))
-              .setLabels(EnumSet.of(Label.EB_ADDRESS, Label.EB_FAILURE, Label.HTTP_CODE,
-            Label.HTTP_METHOD))
-              .setEnabled(true);
+        .setLabels(
+            EnumSet.of(Label.EB_ADDRESS, Label.EB_FAILURE, Label.HTTP_CODE, Label.HTTP_METHOD))
+        .setEnabled(true);
   }
 
-  public static void setJVMmetrics() {
+  public static void setJvmMetrics() {
     MeterRegistry registry = BackendRegistries.getDefaultNow();
     new JvmMemoryMetrics().bindTo(registry);
     new JvmGcMetrics().bindTo(registry);
     new ProcessorMetrics().bindTo(registry);
     new JvmThreadMetrics().bindTo(registry);
-
   }
 
   /**
    * Deploy clustered vert.x instance.
    *
    * @param configPath the path for JSON config file
-   * @param host
+   * @param host host
    * @param modules list of modules to deploy. If list is empty, all modules are deployed
    */
-
   public static void deploy(String configPath, String host, List<String> modules) {
     String config;
     try {
-     config = new String(Files.readAllBytes(Paths.get(configPath)), StandardCharsets.UTF_8);
+      LOGGER.debug("config path " + configPath);
+      config = new String(Files.readAllBytes(Paths.get(configPath)), StandardCharsets.UTF_8);
     } catch (Exception e) {
       LOGGER.fatal("Couldn't read configuration file");
       return;
@@ -186,97 +190,125 @@ public class Deployer {
     String clusterId = configuration.getString("clusterId");
     mgr = getClusterManager(host, zookeepers, clusterId);
     EventBusOptions ebOptions = new EventBusOptions().setClusterPublicHost(host);
-    VertxOptions options = new VertxOptions().setClusterManager(mgr).setEventBusOptions(ebOptions)
-        .setMetricsOptions(getMetricsOptions());
+    VertxOptions options =
+        new VertxOptions()
+            .setClusterManager(mgr)
+            .setEventBusOptions(ebOptions)
+            .setMetricsOptions(getMetricsOptions());
 
-    Vertx.clusteredVertx(options, res -> {
-      if (res.succeeded()) {
-        vertx = res.result();
-        LOGGER.debug(vertx.isMetricsEnabled());
-        setJVMmetrics();
-          if (modules.isEmpty()) {
-            recursiveDeploy(vertx, configuration, 0);
+    Vertx.clusteredVertx(
+        options,
+        res -> {
+          if (res.succeeded()) {
+            vertx = res.result();
+            LOGGER.debug(vertx.isMetricsEnabled());
+            setJvmMetrics();
+            if (modules.isEmpty()) {
+              recursiveDeploy(vertx, configuration, 0);
+            } else {
+              recursiveDeploy(vertx, configuration, modules);
+            }
+
           } else {
-            recursiveDeploy(vertx, configuration, modules);
+            LOGGER.fatal("Could not join cluster");
           }
-
-      } else {
-        LOGGER.fatal("Could not join cluster");
-      }
-    });
-
+        });
   }
 
   public static void gracefulShutdown() {
-    Set<String> deployIDSet = vertx.deploymentIDs();
-    Logger LOGGER = LogManager.getLogger(Deployer.class);
-    LOGGER.info("Shutting down the application");
-    CountDownLatch latch_verticles = new CountDownLatch(deployIDSet.size());
-    CountDownLatch latch_cluster = new CountDownLatch(1);
-    CountDownLatch latch_vertx = new CountDownLatch(1);
-    LOGGER.debug("number of verticles being undeployed are:" + deployIDSet.size());
-    for (String deploymentID : deployIDSet) {
-      vertx.undeploy(deploymentID, handler -> {
-        if (handler.succeeded()) {
-          LOGGER.debug(deploymentID + " verticle  successfully Undeployed");
-          latch_verticles.countDown();
-        } else {
-          LOGGER.warn(deploymentID + "Undeploy failed!");
-        }
-
-      });
+    Set<String> deployIdSet = vertx.deploymentIDs();
+    Logger logger = LogManager.getLogger(Deployer.class);
+    logger.info("Shutting down the application");
+    CountDownLatch latchVerticles = new CountDownLatch(deployIdSet.size());
+    CountDownLatch latchCluster = new CountDownLatch(1);
+    CountDownLatch latchVertx = new CountDownLatch(1);
+    logger.debug("number of verticles being undeployed are:" + deployIdSet.size());
+    for (String deploymentId : deployIdSet) {
+      vertx.undeploy(
+          deploymentId,
+          handler -> {
+            if (handler.succeeded()) {
+              logger.debug(deploymentId + " verticle  successfully Undeployed");
+              latchVerticles.countDown();
+            } else {
+              logger.warn(deploymentId + "Undeploy failed!");
+            }
+          });
     }
 
     try {
-      latch_verticles.await(5, TimeUnit.SECONDS);
-      LOGGER.info("All the verticles undeployed");
+      latchVerticles.await(5, TimeUnit.SECONDS);
+      logger.info("All the verticles undeployed");
       Promise<Void> promise = Promise.promise();
       // leave the cluster
       mgr.leave(promise);
-      LOGGER.info("vertx left cluster succesfully");
+      logger.info("vertx left cluster succesfully");
     } catch (Exception e) {
       e.printStackTrace();
     }
 
     try {
-      latch_cluster.await(5, TimeUnit.SECONDS);
-      vertx.close(handler -> {
-        if (handler.succeeded()) {
-          LOGGER.info("vertx closed succesfully");
-          latch_vertx.countDown();
-        } else {
-          LOGGER.warn("Vertx didn't close properly, reason:" + handler.cause());
-        }
-      });
+      latchCluster.await(5, TimeUnit.SECONDS);
+      vertx.close(
+          handler -> {
+            if (handler.succeeded()) {
+              logger.info("vertx closed succesfully");
+              latchVertx.countDown();
+            } else {
+              logger.warn("Vertx didn't close properly, reason:" + handler.cause());
+            }
+          });
     } catch (Exception e) {
       e.printStackTrace();
     }
 
     try {
-      latch_vertx.await(5, TimeUnit.SECONDS);
+      latchVertx.await(5, TimeUnit.SECONDS);
       // then shut down log4j
       if (LogManager.getContext() instanceof LoggerContext) {
-        LOGGER.debug("Shutting down log4j2");
-        LogManager.shutdown((LoggerContext) LogManager.getContext());
-      } else
-        LOGGER.warn("Unable to shutdown log4j2");
+        logger.debug("Shutting down log4j2");
+        LogManager.shutdown(LogManager.getContext());
+      } else {
+        logger.warn("Unable to shutdown log4j2");
+      }
     } catch (Exception e) {
       e.printStackTrace();
     }
   }
 
   public static void main(String[] args) {
-    CLI cli = CLI.create("IUDX Latest Ingestion Pipeline")
-        .setSummary("A CLI to deploy the ingestion pipeline")
-        .addOption(new Option().setLongName("help").setShortName("h").setFlag(true).setDescription("display help"))
-        .addOption(new Option().setLongName("config").setShortName("c").setRequired(true)
-            .setDescription("configuration file"))
-        .addOption(new Option().setLongName("host").setShortName("i").setRequired(true)
-            .setDescription("public host"))
-        .addOption(new TypedOption<String>().setType(String.class).setLongName("modules")
-            .setShortName("m").setRequired(false).setDefaultValue("all").setParsedAsList(true)
-            .setDescription("comma separated list of verticle names to deploy. "
-                + "If omitted, or if `all` is passed, all verticles are deployed"));
+    CLI cli =
+        CLI.create("IUDX Latest Ingestion Pipeline")
+            .setSummary("A CLI to deploy the ingestion pipeline")
+            .addOption(
+                new Option()
+                    .setLongName("help")
+                    .setShortName("h")
+                    .setFlag(true)
+                    .setDescription("display help"))
+            .addOption(
+                new Option()
+                    .setLongName("config")
+                    .setShortName("c")
+                    .setRequired(true)
+                    .setDescription("configuration file"))
+            .addOption(
+                new Option()
+                    .setLongName("host")
+                    .setShortName("i")
+                    .setRequired(true)
+                    .setDescription("public host"))
+            .addOption(
+                new TypedOption<String>()
+                    .setType(String.class)
+                    .setLongName("modules")
+                    .setShortName("m")
+                    .setRequired(false)
+                    .setDefaultValue("all")
+                    .setParsedAsList(true)
+                    .setDescription(
+                        "comma separated list of verticle names to deploy. "
+                            + "If omitted, or if `all` is passed, all verticles are deployed"));
     StringBuilder usageString = new StringBuilder();
     cli.usage(usageString);
     CommandLine commandLine = cli.parse(Arrays.asList(args), false);
@@ -298,6 +330,4 @@ public class Deployer {
       LOGGER.info(usageString);
     }
   }
-
 }
-
