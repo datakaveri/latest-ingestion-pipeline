@@ -175,7 +175,7 @@ public class Deployer {
   public static void deploy(String configPath, String host, List<String> modules) {
     String config;
     try {
-      LOGGER.debug("config path "+configPath);
+      LOGGER.debug("config path " + configPath);
       config = new String(Files.readAllBytes(Paths.get(configPath)), StandardCharsets.UTF_8);
     } catch (Exception e) {
       LOGGER.fatal("Couldn't read configuration file");
