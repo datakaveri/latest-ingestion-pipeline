@@ -79,7 +79,6 @@ public class RedisClient {
   }
 
   public Future<JsonObject> get(String idKey) {
-    String key = idKey;
     /*
      * example: key = iudx:
      * suratmunicipal_org_6db486cb4f720e8585ba1f45a931c63c25dbbbda_rs_iudx_org_in_surat_itms_realtime_info_surat_itms_live_eta
@@ -87,23 +86,22 @@ public class RedisClient {
      */
 
     if (!this.tenantPrefix.equals("none"))
-      ;
     {
-    String namespace = this.tenantPrefix.concat(":");
-    key = namespace.concat(idKey);
+      String namespace = this.tenantPrefix.concat(":");
+      idKey = namespace.concat(idKey);
     }
+    final String key = idKey;
     return get(key, ".");
   }
 
   public Future<JsonObject> get(String idKey, String path) {
 
-    String key = idKey;
     if (!this.tenantPrefix.equals("none"))
-      ;
     {
       String namespace = this.tenantPrefix.concat(":");
-      key = namespace.concat(idKey);
+      idKey = namespace.concat(idKey);
     }
+    final String key = idKey;
     Promise<JsonObject> promise = Promise.promise();
     redis
         .send(Command.JSON_GET, key, path)
@@ -124,13 +122,13 @@ public class RedisClient {
   }
 
   public Future<Boolean> put(String idKey, String path, String data) {
-    String key = idKey;
+
     if (!this.tenantPrefix.equals("none"))
-      ;
     {
       String namespace = this.tenantPrefix.concat(":");
-      key = namespace.concat(idKey);
+      idKey = namespace.concat(idKey);
     }
+    final String key = idKey;
     Promise<Boolean> promise = Promise.promise();
     String keyInRedis = redisKeyCache.getIfPresent(key);
     LOGGER.debug("key in redis : {}", keyInRedis);
@@ -181,7 +179,6 @@ public class RedisClient {
   public Future<Set<String>> getAllKeys() {
     String keys = "*";
     if (!this.tenantPrefix.equals("none"))
-      ;
     {
       String namespace = this.tenantPrefix.concat(":");
       keys = namespace.concat("*");
