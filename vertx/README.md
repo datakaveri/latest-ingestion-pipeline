@@ -42,20 +42,20 @@ Find the installations of the above along with the configurations to modify the 
 2. If you would like to add your own config with different name than config-dev.json and config-depl.json, place in the `secrets/all-verticles-configs/` and follow the note sections of docker based and maven based setup.
 3. Update all appropriate configs in `example-configs/` ONLY when there is addition of new config parameter options.
 ### Docker based
-1. Install docker and docker-compose (one time setup)
+1. Install docker and docker compose (one time setup)
 2. Build the images 
    ```sh
     ./docker/build.sh
     ```
-3. There are following two ways of setting/deploying the file server using docker-compose:
+3. There are following two ways of setting/deploying the file server using docker compose:
    1. Non-Clustered setup with all verticles running in a single container: 
       - This needs no hazelcast, zookeeper, the deployment can be done on non-swarm too and suitable for development environment.
       - This makes use of iudx/lip-dev:latest image and config-dev.json present at `secrets/all-verticles-configs/config-dev.json`
          ```sh 
          # Command to bring up the non-clustered latest-ingestion-pipeline container
-         docker-compose -f docker-compose.yml -f docker-compose.dev.yml up -d
+         docker compose -f docker-compose.yml -f docker-compose.dev.yml up -d
          # Command to bring down the non-clustered latest-ingestion-pipeline container
-         docker-compose -f docker-compose.yml -f docker-compose.dev.yml down
+         docker compose -f docker-compose.yml -f docker-compose.dev.yml down
          ```
    2. Clustered setup with all verticles running in a single container: 
       - This needs following things:
@@ -64,9 +64,9 @@ Find the installations of the above along with the configurations to modify the 
       - This makes use of iudx/lip-depl:latest image and config-depl.json present at `secrets/all-verticles-configs/config-depl.json`
          ```sh 
          # Command to bring up the clustered one latest-ingestion-pipeline container
-         docker-compose -f docker-compose.yml -f docker-compose.depl.yml up -d
+         docker compose -f docker-compose.yml -f docker-compose.depl.yml up -d
          # Command to bring down the clustered one latest-ingestion-pipeline container
-         docker-compose -f docker-compose.yml -f docker-compose.depl.yml down
+         docker compose -f docker-compose.yml -f docker-compose.depl.yml down
          ```
 #### Note   
 1. If you want to try out or do temporary things, such as 
