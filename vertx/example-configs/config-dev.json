@@ -22,6 +22,7 @@
 		},
 		{
 			"id": "iudx.ingestion.pipeline.redis.RedisVerticle",
+		        "tenantPrefix": "iudx",
 			"verticleInstances": 1,
 			"redisMode": "CLUSTER",
 			"redisUsername": "xyz",

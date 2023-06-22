@@ -27,6 +27,7 @@ public class RedisClient {
   private RedisAPI redis;
   private final Vertx vertx;
   private final JsonObject config;
+  private String tenantPrefix;
 
   private static final Logger LOGGER = LogManager.getLogger(RedisClient.class);
 
@@ -55,6 +56,7 @@ public class RedisClient {
         .append(":")
         .append(config.getInteger("redisPort").toString());
     String mode = config.getString("redisMode");
+    this.tenantPrefix = config.getString("tenantPrefix");
     if (mode.equals("CLUSTER")) {
       options =
           new RedisOptions().setType(RedisClientType.CLUSTER).setUseReplicas(RedisReplicas.SHARE);
@@ -81,12 +83,29 @@ public class RedisClient {
     return promise.future();
   }
 
-  public Future<JsonObject> get(String key) {
+  public Future<JsonObject> get(String idKey) {
+    /*
+     * example: key =
+     * iudx:iisc_ac_in_89a36273d77dac4cf38114fca1bbe64392547f86_rs_iudx_io_pune_env_flood_FWR055
+     * where "iudx" redis namespace and key is the other part +
+     */
+
+    if (!this.tenantPrefix.equals("none")) {
+      String namespace = this.tenantPrefix.concat(":");
+      idKey = namespace.concat(idKey);
+    }
+    final String key = idKey;
     return get(key, ".".toString());
   }
 
 
-  public Future<JsonObject> get(String key, String path) {
+  public Future<JsonObject> get(String idKey, String path) {
+
+    if (!this.tenantPrefix.equals("none")) {
+      String namespace = this.tenantPrefix.concat(":");
+      idKey = namespace.concat(idKey);
+    }
+    final String key = idKey;
     Promise<JsonObject> promise = Promise.promise();
     redis.send(Command.JSON_GET, key, path).onFailure(res -> {
       promise.fail(String.format("JSONGET did not work: %s", res.getMessage()));
@@ -101,7 +120,13 @@ public class RedisClient {
     return promise.future();
   }
 
-  public Future<Boolean> put(String key, String path, String data) {
+  public Future<Boolean> put(String idKey, String path, String data) {
+
+    if (!this.tenantPrefix.equals("none")) {
+      String namespace = this.tenantPrefix.concat(":");
+      idKey = namespace.concat(idKey);
+    }
+    final String key = idKey;
     Promise<Boolean> promise = Promise.promise();
     String keyInRedis = redisKeyCache.getIfPresent(key);
     LOGGER.debug("key in redis : {}",keyInRedis);
@@ -142,8 +167,13 @@ public class RedisClient {
 
 
   public Future<Set<String>> getAllKeys() {
+    String keys = "*";
+    if (!this.tenantPrefix.equals("none")) {
+      String namespace = this.tenantPrefix.concat(":");
+      keys = namespace.concat("*");
+    }
     Promise<Set<String>> promise = Promise.promise();
-    redis.keys("*", handler -> {
+    redis.keys(keys, handler -> {
       if (handler.succeeded()) {
         List<String> list =
             Arrays.asList(
