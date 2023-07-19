@@ -88,7 +88,6 @@ public class MessageProcessorImpl implements MessageProcessService {
 
   private ProcessedMessage getProcessedMessage(JsonObject json, String pathParamAttribute) {
     StringBuilder id = new StringBuilder(json.getString("id"));
-
     StringBuilder pathParam = new StringBuilder();
     if (pathParamAttribute == null || pathParamAttribute.isBlank()) {
       id.append("/").append(defaultAttribValue);
@@ -99,11 +98,7 @@ public class MessageProcessorImpl implements MessageProcessService {
       pathParam.append("_").append(DigestUtils.shaHex(id.toString()));
     }
     ProcessedMessage message =
-        new ProcessedMessage(
-            json.getString("id").replaceAll("/", "_").replaceAll("-", "_").replaceAll("\\.", "_"),
-            pathParam.toString(),
-            json);
-
+        new ProcessedMessage(json.getString("id"), pathParam.toString(), json);
     return message;
   }
 
