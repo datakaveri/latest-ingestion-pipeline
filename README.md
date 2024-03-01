@@ -70,7 +70,7 @@ We follow Git Merge based workflow
 4. If you find any issues with the implementation please raise an issue on Issues in GitHub.
 
 ## License
-[MIT](./LICENSE.txt)
+[View License](./LICENSE)
 
 
 
