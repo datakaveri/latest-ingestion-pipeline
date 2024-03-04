@@ -1,7 +1,7 @@
 pipeline {
   environment {
-    devRegistry = 'ghcr.io/datakaveri/rs-dev'
-    deplRegistry = 'ghcr.io/datakaveri/rs-depl'
+    devRegistry = 'ghcr.io/datakaveri/lip-dev'
+    deplRegistry = 'ghcr.io/datakaveri/lip-depl'
     registryUri = 'https://ghcr.io'
     registryCredential = 'datakaveri-ghcr'
     GIT_HASH = GIT_COMMIT.take(7)
@@ -17,7 +17,6 @@ pipeline {
     stage('Build images') {
       steps {
         script {
-          echo 'Pulled - ' + env.GIT_BRANCH
           devImage = docker.build(devRegistry, "-f vertx/docker/dev.dockerfile .")
           deplImage = docker.build(deplRegistry, "-f vertx/docker/depl.dockerfile .")
         }
@@ -27,7 +26,7 @@ pipeline {
       when {
         allOf {
           anyOf {
-            changeset "docker/**"
+            changeset "vertx/**"
             changeset "docs/**"
             changeset "pom.xml"
             changeset "src/main/**"
@@ -43,8 +42,8 @@ pipeline {
           steps {
             script {
               docker.withRegistry( registryUri, registryCredential ) {
-                devImage.push("5.0.0-${env.GIT_HASH}")
-                deplImage.push("5.0.0-${env.GIT_HASH}")
+                devImage.push("5.5.0-alpha-${env.GIT_HASH}")
+                deplImage.push("5.5.0-alpha-${env.GIT_HASH}")
               }
             }
           }
@@ -52,7 +51,7 @@ pipeline {
         stage('Docker Swarm deployment') {
           steps {
             script {
-              sh "ssh azureuser@docker-swarm 'docker service update lip_lip --image ghcr.io/datakaveri/lip-depl:5.0.0-${env.GIT_HASH}'"
+              sh "ssh azureuser@docker-swarm 'docker service update lip_lip --image ghcr.io/datakaveri/lip-depl:5.5.0-alpha-${env.GIT_HASH}'"
               sh 'sleep 10'
             }
           }
