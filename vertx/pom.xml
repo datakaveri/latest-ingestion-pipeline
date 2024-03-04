@@ -1,6 +1,5 @@
-<project xmlns="https://maven.apache.org/POM/4.0.0"
-	xmlns:xsi="https://www.w3.org/2001/XMLSchema-instance"
-	xsi:schemaLocation="https://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+		 xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>datakaveri.org</groupId>
 	<artifactId>iudx.ingestion.pipeline</artifactId>
@@ -8,16 +7,16 @@
 	<name>iudx-ingestion-pipeline</name>
 
 	<properties>
-		<vertx.version>4.3.2</vertx.version>
+		<vertx.version>4.5.4</vertx.version>
 		<openjdk.version>11</openjdk.version>
 		<hazelcast.version>4.0.2</hazelcast.version>
-		<micrometer.version>1.9.2</micrometer.version>
-		<curator.version>5.3.0</curator.version>
-		<checkstyle.version>10.5.0</checkstyle.version>
-		<maven-checkstyle-plugin-google.version>3.1.2</maven-checkstyle-plugin-google.version>
-		<maven-pmd-plugin.version>3.17.0</maven-pmd-plugin.version>
-		<apache-log4j2.version>2.17.1</apache-log4j2.version>
-		<lmax-disruptor.version>3.4.4</lmax-disruptor.version>
+		<micrometer.version>1.12.3</micrometer.version>
+		<curator.version>5.6.0</curator.version>
+		<checkstyle.version>10.13.0</checkstyle.version>
+		<maven-checkstyle-plugin-google.version>3.3.1</maven-checkstyle-plugin-google.version>
+		<maven-pmd-plugin.version>3.21.2</maven-pmd-plugin.version>
+		<apache-log4j2.version>2.23.0</apache-log4j2.version>
+		<lmax-disruptor.version>4.0.0</lmax-disruptor.version>
 		<exec.mainClass>iudx.ingestion.pipeline.deploy.Deployer</exec.mainClass>
 		<exec.mainClassDev>iudx.ingestion.pipeline.deploy.DeployerDev</exec.mainClassDev>
 		<config-dev.file>config-dev.json</config-dev.file>
@@ -40,7 +39,7 @@
                 <scope>import</scope>
                 <type>pom</type>
             </dependency>
-        </dependencies>	
+        </dependencies>
     </dependencyManagement>
 	<dependencies>
 		<dependency>
@@ -67,24 +66,24 @@
 		<dependency>
 			<groupId>org.apache.maven.plugins</groupId>
 			<artifactId>maven-checkstyle-plugin</artifactId>
-			<version>3.1.2</version>
+			<version>3.3.1</version>
 		</dependency>
 		<dependency>
 			<groupId>org.junit.jupiter</groupId>
 			<artifactId>junit-jupiter-api</artifactId>
-			<version>5.8.2</version>
+			<version>5.10.2</version>
 			<scope>test</scope>
 		</dependency>
 		<dependency>
 			<groupId>org.junit.jupiter</groupId>
 			<artifactId>junit-jupiter-params</artifactId>
-			<version>5.8.2</version>
+			<version>5.10.2</version>
 			<scope>test</scope>
 		</dependency>
 		<dependency>
 			<groupId>org.junit.jupiter</groupId>
 			<artifactId>junit-jupiter-engine</artifactId>
-			<version>5.8.2</version>
+			<version>5.10.2</version>
 		</dependency>
 		<dependency>
 			<groupId>io.vertx</groupId>
@@ -155,6 +154,7 @@
 		<dependency>
 		    <groupId>org.apache.logging.log4j</groupId>
 		    <artifactId>log4j-core</artifactId>
+			<scope>compile</scope>
 		</dependency>
 		<dependency>
 		    <groupId>org.apache.logging.log4j</groupId>
@@ -183,12 +183,12 @@
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-checkstyle-plugin</artifactId>
-				<version>3.1.2</version>
+				<version>3.3.1</version>
 				<dependencies>
 					<dependency>
 						<groupId>com.puppycrawl.tools</groupId>
 						<artifactId>checkstyle</artifactId>
-						<version>10.3.1</version>
+						<version>10.13.0</version>
 					</dependency>
 				</dependencies>
 				<configuration>
@@ -204,7 +204,7 @@
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-shade-plugin</artifactId>
-				<version>3.3.0</version>
+				<version>3.5.2</version>
 				<executions>
 					<execution>
 						<id>dev</id>
@@ -298,7 +298,7 @@
 			<plugin>
 				<groupId>org.codehaus.mojo</groupId>
 				<artifactId>exec-maven-plugin</artifactId>
-				<version>3.1.0</version>
+				<version>3.2.0</version>
 				<executions>
 					<execution>
 						<id>ingestion-pipeline</id>
@@ -318,12 +318,12 @@
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-surefire-plugin</artifactId>
-				<version>3.0.0-M7</version>
+				<version>3.2.5</version>
 			</plugin>
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-compiler-plugin</artifactId>
-				<version>3.10.1</version>
+				<version>3.12.1</version>
 				<configuration>
 					<release>${openjdk.version}</release>
 				</configuration>
@@ -372,12 +372,12 @@
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-jxr-plugin</artifactId>
-				<version>3.3.0</version>
+				<version>3.3.2</version>
 			</plugin>
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-surefire-report-plugin</artifactId>
-				<version>3.0.0-M7</version>
+				<version>3.2.5</version>
 				<reportSets>
 					<reportSet>
 						<reports>
