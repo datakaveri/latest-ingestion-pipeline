@@ -17,8 +17,8 @@ pipeline {
     stage('Build images') {
       steps {
         script {
-          devImage = docker.build(devRegistry, "-f vertx/docker/dev.dockerfile .")
-          deplImage = docker.build(deplRegistry, "-f vertx/docker/depl.dockerfile .")
+          devImage = docker.build(devRegistry, "-f vertx/docker/dev.dockerfile vertx/")
+          deplImage = docker.build(deplRegistry, "-f vertx/docker/depl.dockerfile vertx/")
         }
       }
     }
