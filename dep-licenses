@@ -1,0 +1,55 @@
+Client Packages:
+SNo    Software Name<groupID:artifactID>                        License Information                                   Modification Description
+1      io.vertx:vert.x.version                                  Apache 2.0, Eclipse Public License(EPL) 1.0           None
+2      openjdk                                                  General Public License(GPL) Version 2.0               None
+3      com.hazelcast:hazelcast-zookeeper                        Hazelcast Community License Agreement, Version 1.0    None
+4      io.micrometer:micrometer-core                            Apache 2.0                                            None
+5      io.micrometer:micrometer-registry-prometheus             Apache 2.0                                            None
+6      org.apache.curator:curator-x-discovery                   Apache 2.0                                            None
+7      com.puppycrawl.tools:checkstyle                          Lesser General Public License (LGPL) 2.1              None
+8      org.apache.maven.plugins:maven-checkstyle-plugin         Apache 2.0                                            None
+9      org.apache.maven.plugins:maven-pmd-plugin                Apache 2.0                                            None
+10     org.apache.logging.log4j:log4j-bom                       Apache 2.0                                            None
+11     com.lmax:disruptor                                       Apache 2.0                                            None
+12     io.vertx:vertx-stack-depchain                            Apache 2.0, Eclipse Public License(EPL) 1.0           None
+13     io.vertx:vertx-codegen                                   Apache 2.0, Eclipse Public License(EPL) 1.0           None
+14     io.vertx:vertx-service-proxy                             Apache 2.0, Eclipse Public License(EPL) 1.0           None
+15     io.vertx:vertx-core                                      Apache 2.0, Eclipse Public License(EPL) 1.0           None
+16     io.vertx:vertx-web                                       Apache 2.0, Eclipse Public License(EPL) 1.0           None
+17     io.vertx:vertx-web-client                                Apache 2.0, Eclipse Public License(EPL) 1.0           None
+18     org.junit.jupiter:junit-jupiter-api                      Eclipse Public License(EPL) 2.0                       None
+19     org.junit.jupiter:junit-jupiter-params                   Eclipse Public License(EPL) 2.0                       None
+20     org.junit.jupiter:junit-jupiter-engine                   Eclipse Public License(EPL) 2.0                       None
+21     io.vertx:vertx-junit5                                    Apache 2.0, Eclipse Public License(EPL) 1.0           None
+22     io.vertx:vertx-unit                                      Apache 2.0, Eclipse Public License(EPL) 1.0           None
+23     io.vertx:vertx-rabbitmq-client                           Apache 2.0, Eclipse Public License(EPL) 1.0           None
+24     io.vertx:vertx-redis-client                              Apache 2.0, Eclipse Public License(EPL) 1.0           None
+25     com.ongres.scram:client                                  BSD 2-clause                                          None
+26     io.vertx:vertx-pg-client                                 Apache 2.0, Eclipse Public License(EPL) 1.0           None
+27     org.codehaus.jackson:jackson-databind                    Apache 2.0                                            None
+28     io.vertx:vertx-micrometer-metrics                        Apache 2.0, Eclipse Public License(EPL) 1.0           None
+29     io.vertx:vertx-hazelcast                                 Apache 2.0, Eclipse Public License(EPL) 1.0           None
+30     org.apache.logging.log4j:log4j-core                      Apache 2.0                                            None
+31     org.apache.logging.log4j:log4j-api                       Apache 2.0                                            None
+32     org.apache.logging.log4j:log4j-slf4j-impl                Apache 2.0                                            None
+33     org.apache.maven.plugins:maven-shade-plugin              Apache 2.0                                            None
+34     com.puppycrawl.tools:checkstyle                          Lesser General Public License (LGPL) 2.1              None
+35     org.apache.maven.plugins:maven-javadoc-plugin            Apache 2.0                                            None
+36     org.codehaus.mojo:exec-maven-plugin                      Apache 2.0                                            None
+37     org.apache.maven.plugins:maven-surefire-plugin           Apache 2.0                                            None
+38     org.apache.maven.plugins:maven-compiler-plugin           Apache 2.0                                            None
+39     org.apache.maven.plugins:maven-jxr-plugin                Apache 2.0                                            None
+40     org.apache.maven.plugins:maven-surefire-report-plugin    Apache 2.0                                            None
+
+External Servers:
+SNo     Software Name     License Information                                              Modification Description
+1       PostgresQL        PostgreSQL Licence                                               None
+2       RabbitMQ          Apache 2.0                                                       None
+3       Zookeeper         Hazelcast Community License Agreement, Version 1.0               None
+4       Redis             Redis Core : BSD-3-Clause License                                None
+                          RedisJSON module: Redis Source Available License 2.0 (RSALv2)    None
+                                            Server Side Public License v1 (SSPLv1)         None
+
+Internal Servers:
+SNo    Software Name    License Information    Modification Description
+1       IUDX Resource Server    Apache 2.0             None
