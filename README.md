@@ -1,3 +1,4 @@
+
 [![Build Status](https://img.shields.io/jenkins/build?jobUrl=https%3A%2F%2Fjenkins.iudx.io%2Fview%2Fiudx-master%2Fjob%2Fiudx%2520lip%2520(master)%2520pipeline%2F)](https://jenkins.iudx.io/view/iudx-master/job/iudx%20lip%20(master)%20pipeline/lastBuild/)
 
 ![IUDX](./images/iudx.png)
@@ -64,6 +65,20 @@ A detailed explanation of the implementation can be found [here](vertx/README.md
 
 The design is similar to the async Python + Aio_pika but the implemenation it follows the reactive pattern where we isolate and parallelize the IO and CPU bound computations. 
 
+### Testing
+
+### Unit tests
+1. Run the tests using `mvn clean test checkstyle:checkstyle pmd:pmd`  
+2. Reports are stored in `./target/`
+
+
+### Integration tests
+Integration tests are through Rest Assured 
+1. Run the server through either docker, maven or redeployer
+2. Run the integration tests `mvn test-compile failsafe:integration-test -DskipUnitTests=true -DintTestHost=localhost -DintTestPort=8080`
+3. Reports are stored in `./target/`
+
+
 ## Contributing
 We follow Git Merge based workflow 
 1. Fork this repo
@@ -73,9 +88,3 @@ We follow Git Merge based workflow
 
 ## License
 [View License](./LICENSE)
-
-
-
-
-
-
