@@ -40,8 +40,14 @@
                 <type>pom</type>
             </dependency>
         </dependencies>
+
     </dependencyManagement>
 	<dependencies>
+		<dependency>
+			<groupId>com.google.guava</groupId>
+			<artifactId>guava</artifactId>
+			<version>33.0.0-jre</version>
+		</dependency>
 		<dependency>
 			<groupId>io.vertx</groupId>
 			<artifactId>vertx-codegen</artifactId>
@@ -198,7 +204,7 @@
 					<!-- <violationSeverity>warning</violationSeverity> -->
 					<consoleOutput>true</consoleOutput>
 					<encoding>UTF-8</encoding>
-					<configLocation>google_checks.xml</configLocation>
+					<configLocation>vertx/google_checks.xml</configLocation>
 					<module name="LineLength">
 						<property name="max" value="120" />
 					</module>
@@ -361,7 +367,7 @@
 					<!-- <violationSeverity>warning</violationSeverity> -->
 					<consoleOutput>true</consoleOutput>
 					<encoding>UTF-8</encoding>
-					<configLocation>./google_checks.xml</configLocation>
+					<configLocation>vertx/google_checks.xml</configLocation>
 					<sourceDirectories>
 						<sourceDirectory>${project.build.sourceDirectory}</sourceDirectory>
 					</sourceDirectories>
