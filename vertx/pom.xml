@@ -43,6 +43,7 @@
 
     </dependencyManagement>
 	<dependencies>
+		<!-- Packages for cache -->
 		<dependency>
 			<groupId>com.google.guava</groupId>
 			<artifactId>guava</artifactId>
