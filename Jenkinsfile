@@ -26,10 +26,10 @@ pipeline {
       when {
         allOf {
           anyOf {
-            changeset "docker/**"
-            changeset "docs/**"
-            changeset "pom.xml"
-            changeset "src/main/**"
+            changeset "vertx/docker/**"
+            changeset "vertx/docs/**"
+            changeset "vertx/pom.xml"
+            changeset "vertx/src/main/**"
             triggeredBy cause: 'UserIdCause'
           }
           expression {
