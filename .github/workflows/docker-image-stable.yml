@@ -1,0 +1,49 @@
+# This github workflow will automatically update docker image tags of lip-depl in the datakaveri/iudx-deployment repository files,
+# whenever a docker image is pushed to ghcr.io/datakaveri/lip-depl with the tag 5.5.0. This will update the 5.5.0 release branch.
+
+name: Update LIP docker image tags (5.5.0)
+
+# Trigger on new package published to registry
+on:
+  registry_package:
+    types: [published]
+
+permissions:
+  packages: read
+
+jobs:
+  update-release:
+    runs-on: ubuntu-20.04
+    steps:
+    - uses: actions/checkout@v3
+      with:
+        repository: datakaveri/iudx-deployment
+        token: "${{ secrets.JENKINS_UPDATE }}"
+        fetch-depth: 0
+
+    - name: Update LIP docker image tags for 5.5.0 release
+      env: 
+        GH_TOKEN: ${{ secrets.JENKINS_UPDATE }}
+      run: | 
+        export newtag5_5_0=`(head -n1 <(curl -H "Accept: application/vnd.github+json" -H "Authorization: Bearer ${{ secrets.GITHUB_TOKEN }}" https://api.github.com/orgs/datakaveri/packages/container/lip-depl/versions | jq ' .[].metadata.container.tags[0]' | grep 5.5.0 | grep -v alpha | sed -e 's/^"//' -e 's/"$//'))`
+        export oldtag5_5_0=`yq -r .services.lip.image Docker-Swarm-deployment/single-node/lip/lip-stack.yaml | cut -d : -f 2`
+
+        if [ "$newtag5_5_0" != "$oldtag5_5_0" ]
+        then
+          git checkout 5.5.0
+          git checkout -b lip-5.5.0-automatic-updates/$newtag5_5_0
+          
+          sed -i s/$oldtag5_5_0/$newtag5_5_0/g Docker-Swarm-deployment/single-node/lip/lip-stack.yaml
+          
+          export oldappversion=`yq -r .version K8s-deployment/Charts/latest-ingestion-pipeline/Chart.yaml`
+          export newappversion=`yq -r .version K8s-deployment/Charts/latest-ingestion-pipeline/Chart.yaml | awk -F. -v OFS=. 'NF==1{print ++$NF}; NF>1{if(length($NF+1)>length($NF))$(NF-1)++; $NF=sprintf("%0*d", length($NF), ($NF+1)%(10^length($NF))); print}'`
+          
+          sed -i s/$oldappversion/$newappversion/g K8s-deployment/Charts/latest-ingestion-pipeline/Chart.yaml
+          sed -i s/$oldtag5_5_0/$newtag5_5_0/g K8s-deployment/Charts/latest-ingestion-pipeline/values.yaml
+          
+          git add Docker-Swarm-deployment/single-node/lip/lip-stack.yaml K8s-deployment/Charts/latest-ingestion-pipeline/values.yaml K8s-deployment/Charts/latest-ingestion-pipeline/Chart.yaml
+          git commit --allow-empty -m "updated LIP docker image tag to $newtag5_5_0"
+          git push --set-upstream origin lip-5.5.0-automatic-updates/$newtag5_5_0
+          
+          gh pr create -R datakaveri/iudx-deployment --base 5.5.0 --fill 
+        fi

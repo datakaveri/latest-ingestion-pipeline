@@ -42,8 +42,8 @@ pipeline {
           steps {
             script {
               docker.withRegistry( registryUri, registryCredential ) {
-                devImage.push("5.5.0-alpha-${env.GIT_HASH}")
-                deplImage.push("5.5.0-alpha-${env.GIT_HASH}")
+                devImage.push("5.6.0-alpha-${env.GIT_HASH}")
+                deplImage.push("5.6.0-alpha-${env.GIT_HASH}")
               }
             }
           }
@@ -51,7 +51,7 @@ pipeline {
         stage('Docker Swarm deployment') {
           steps {
             script {
-              sh "ssh azureuser@docker-swarm 'docker service update lip_lip --image ghcr.io/datakaveri/lip-depl:5.5.0-alpha-${env.GIT_HASH}'"
+              sh "ssh azureuser@docker-swarm 'docker service update lip_lip --image ghcr.io/datakaveri/lip-depl:5.6.0-alpha-${env.GIT_HASH}'"
               sh 'sleep 10'
             }
           }
