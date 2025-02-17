@@ -10,6 +10,7 @@ public class Constants {
 
   // RMQ
   public static final String RMQ_LATEST_DATA_Q = "redis-latest";
+  public static final String SEQ_NUM = "seq_num";
 
   public static final String RMQ_PROCESSED_MSG_EX = "processed-messages";
   public static final String RMQ_PROCESSED_MSG_Q = "lip-processed-messages";
