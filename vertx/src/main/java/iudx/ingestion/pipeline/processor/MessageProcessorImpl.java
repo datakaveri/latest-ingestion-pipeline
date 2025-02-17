@@ -31,6 +31,7 @@ public class MessageProcessorImpl implements MessageProcessService {
   public MessageProcessService process(
       JsonObject message, Handler<AsyncResult<JsonObject>> handler) {
     LOGGER.info("message procesing starts : ");
+    message.remove(SEQ_NUM);
     if (message == null || message.isEmpty()) {
       handler.handle(Future.failedFuture("empty/null message received"));
     } else {
