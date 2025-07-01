@@ -1,5 +1,5 @@
 
-[![Build Status](https://img.shields.io/jenkins/build?jobUrl=https%3A%2F%2Fjenkins.iudx.io%2Fview%2Fiudx-master%2Fjob%2Fiudx%2520lip%2520(master)%2520pipeline%2F)](https://jenkins.iudx.io/view/iudx-master/job/iudx%20lip%20(master)%20pipeline/lastBuild/)
+[![Build Status](https://img.shields.io/jenkins/build?jobUrl=https%3A%2F%2Fjenkins.iudx.io%2Fview%2Fdx-v5.6.0%2Fjob%2Fiudx%2520lip%2520(v5.6.0)%2520pipeline%2F)](https://jenkins.iudx.io/view/dx-v5.6.0/job/iudx%20lip%20(v5.6.0)%20pipeline/lastBuild/)
 
 ![IUDX](./images/iudx.png)
 # Latest Ingestion Pipeline
