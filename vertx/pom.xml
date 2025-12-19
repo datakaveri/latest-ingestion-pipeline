@@ -15,7 +15,7 @@
 		<checkstyle.version>10.13.0</checkstyle.version>
 		<maven-checkstyle-plugin-google.version>3.3.1</maven-checkstyle-plugin-google.version>
 		<maven-pmd-plugin.version>3.21.2</maven-pmd-plugin.version>
-		<apache-log4j2.version>2.23.0</apache-log4j2.version>
+		<apache-log4j2.version>2.25.3</apache-log4j2.version>
 		<lmax-disruptor.version>4.0.0</lmax-disruptor.version>
 		<exec.mainClass>iudx.ingestion.pipeline.deploy.Deployer</exec.mainClass>
 		<exec.mainClassDev>iudx.ingestion.pipeline.deploy.DeployerDev</exec.mainClassDev>
